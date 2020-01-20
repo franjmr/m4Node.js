@@ -1,7 +1,6 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
-//const jsapiServer = 'http://sirius.meta4.com:43020' ;
 const jsapiServer = 'http://eduardoferw7:8080' ;
 const usr = "JCM_ESS";
 const pwd = "123";
@@ -14,7 +13,7 @@ const {window} = new JSDOM(``, {
     contentType: "text/html",
     includeNodeLocations: true,
     storageQuota: 10000000
-  });
+});
 
 // const Window = require('window');
 // global.window = new Window();
@@ -22,10 +21,6 @@ global.window = window;
 global.document = window.document;
 global.navigator = window.navigator;
 global.DOMParser = window.DOMParser;
-
-// hook to define the module base url
-// var key = '__gwtDevModeHook:m4jsapi:moduleBase';
-// window[key] = "http://localhost";
 
 async function start() {
     
@@ -37,13 +32,9 @@ async function start() {
     })};
 
     function logon () { return new Promise((resolve) => { 
-
         console.log("doing logon...");
-        
         window.meta4.M4Executor.setServiceBaseUrl(jsapiServer);
-
         let ex = new window.meta4.M4Executor();
-    
         ex.logon(usr, pwd, "2", 
             (x) => {
                 if (!x.getResult()) {
@@ -62,11 +53,8 @@ async function start() {
     }) };
 
     function loadMetadata () { return new Promise((resolve) => { 
-
         console.log("loading metadata");
-        
         let ex = new window.meta4.M4Executor();
-
         ex.loadMetadata(['PSCO_WDG_MY_TASKS'], 
             (x) => {
                 console.log("Metadata loaded ok!");
@@ -80,14 +68,10 @@ async function start() {
     }) };
 
     function executeMethod () { return new Promise((resolve) => { 
-
         console.log("executing method");
-
         let obj = new window.meta4.M4Object("PSCO_WDG_MY_TASKS");
 		let	node = obj.getNode("PSCO_WDG_MY_TASKS");
-
         let req = new window.meta4.M4Request(node.getObject(), node.getId(), "PLCO_LOAD", [null]);
-
         let ex = new window.meta4.M4Executor();
 		ex.execute(req,
             (x) => {
@@ -103,9 +87,7 @@ async function start() {
     }) };
 
     function logout () { return new Promise((resolve) => { 
-
         console.log("executing logout");
-
         let ex = new window.meta4.M4Executor();
 		ex.logout(
             (x) => {
@@ -129,4 +111,3 @@ var requireFromUrl = require('require-from-url/sync');
 requireFromUrl(jsapiServer + baseFile);
 
 start();
-
