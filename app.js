@@ -32,7 +32,7 @@ async function start() {
         }
     })};
 
-    function logon () { return new Promise((resolve) => { 
+    function logon () { return new Promise((resolve, reject) => { 
         console.log("doing logon...");
         window.meta4.M4Executor.setServiceBaseUrl(jsapiServer);
         let ex = new window.meta4.M4Executor();
@@ -40,20 +40,21 @@ async function start() {
             (x) => {
                 if (!x.getResult()) {
                     console.log("Logon didn't work");
+                    reject();
                 }
                 else {
-                    console.log("ok! Logon Token = " + x.getResult().getToken())
+                    console.log("ok! Logon Token = " + x.getResult().getToken());
+                    resolve();
                 }
-                resolve();
             }, 
             (x) => {
                 console.log("error: " + x);
-                resolve();
+                reject();
             }
         );
     }) };
 
-    function loadMetadata () { return new Promise((resolve) => { 
+    function loadMetadata () { return new Promise((resolve,reject) => { 
         console.log("loading metadata");
         let ex = new window.meta4.M4Executor();
         ex.loadMetadata(['PSCO_WDG_MY_TASKS'], 
@@ -63,12 +64,12 @@ async function start() {
             }, 
             (x) => {
                 console.log("error: Loading metadata: " + x);
-                resolve();
+                reject();
             }
         );
     }) };
 
-    function executeMethod () { return new Promise((resolve) => { 
+    function executeMethod () { return new Promise((resolve,reject) => { 
         console.log("executing method");
         let obj = new window.meta4.M4Object("PSCO_WDG_MY_TASKS");
 		let	node = obj.getNode("PSCO_WDG_MY_TASKS");
@@ -82,7 +83,7 @@ async function start() {
             }, 
             (x) => {
                 console.log("error: Method executed: " + x);
-                resolve();
+                reject();
             }
         );
     }) };
@@ -97,7 +98,7 @@ async function start() {
             }, 
             (x) => {
                 console.log("error: logout: " + x);
-                resolve();
+                reject();
             }
         );
     }) };
@@ -109,10 +110,10 @@ async function start() {
 }
 
 try{
-    const requireFromUrl = require('require-from-url/sync');
+    const requireFromUrlSync = require('require-from-url/sync');
     const listener = require('require-from-url/addLoadListener');
     
-    requireFromUrl(apiUrl);
+    requireFromUrlSync(apiUrl);
     listener(apiUrl, function(){
         console.log("Loaded!");
         start();
