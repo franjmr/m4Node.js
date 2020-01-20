@@ -104,7 +104,7 @@ async function start() {
     }) };
 
     load().then(logon).then(loadMetadata).then(executeMethod).then(logout).then(() => {
-        console.log("All done")
+        console.log("All done");
     });
 
 }
