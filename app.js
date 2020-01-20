@@ -1,10 +1,9 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
-const jsapiServer = 'http://eduardoferw7:8080' ;
-const usr = "JCM_ESS";
-const pwd = "123";
-
+const jsapiServer = 'http://arya.meta4.com:5020' ;
+const usr = "ORLIEMOBILE";
+const pwd = "RUN";
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
 
 const {window} = new JSDOM(``, {
@@ -107,7 +106,7 @@ async function start() {
 
 }
 
-var requireFromUrl = require('require-from-url/sync');
+const requireFromUrl = require('require-from-url/sync');
 requireFromUrl(jsapiServer + baseFile);
 
 start();
