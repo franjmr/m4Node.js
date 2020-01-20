@@ -4,7 +4,9 @@ const { JSDOM } = jsdom;
 const jsapiServer = 'http://arya.meta4.com:5020' ;
 const usr = "ORLIEMOBILE";
 const pwd = "RUN";
-const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
+//const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
+const baseFile = "/m4jsapi/m4jsapi.nocache.js"
+const apiUrl = jsapiServer.concat(baseFile);
 
 const {window} = new JSDOM(``, {
     url: jsapiServer + baseFile,
@@ -106,7 +108,17 @@ async function start() {
 
 }
 
-const requireFromUrl = require('require-from-url/sync');
-requireFromUrl(jsapiServer + baseFile);
+try{
+    const requireFromUrl = require('require-from-url/sync');
+    const listener = require('require-from-url/addLoadListener');
+    
+    requireFromUrl(apiUrl);
+    listener(apiUrl, function(){
+        console.log("Loaded!");
+        start();
+    });
 
-start();
+}catch(error){
+    console.error("Error loading api from url "+apiUrl);
+    console.error(error);
+}
