@@ -1,11 +1,10 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
-const jsapiServer = 'http://arya.meta4.com:5020' ;
+const jsapiServer = 'http://franciscocaw10.meta4.com:5020/' ;
 const usr = "ORLIEMOBILE";
 const pwd = "RUN";
-//const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
-const baseFile = "/m4jsapi/m4jsapi.nocache.js"
+const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
 const apiUrl = jsapiServer.concat(baseFile);
 
 const {window} = new JSDOM(``, {
@@ -16,8 +15,6 @@ const {window} = new JSDOM(``, {
     storageQuota: 10000000
 });
 
-// const Window = require('window');
-// global.window = new Window();
 global.window = window;
 global.document = window.document;
 global.navigator = window.navigator;
@@ -40,7 +37,7 @@ async function start() {
             (x) => {
                 if (!x.getResult()) {
                     console.log("Logon didn't work");
-                    reject();
+                    reject("Logon didn't work");
                 }
                 else {
                     console.log("ok! Logon Token = " + x.getResult().getToken());
@@ -64,7 +61,7 @@ async function start() {
             }, 
             (x) => {
                 console.log("error: Loading metadata: " + x);
-                reject();
+                reject("error: Loading metadata");
             }
         );
     }) };
@@ -88,7 +85,7 @@ async function start() {
         );
     }) };
 
-    function logout () { return new Promise((resolve) => { 
+    function logout () { return new Promise((resolve,reject) => { 
         console.log("executing logout");
         let ex = new window.meta4.M4Executor();
 		ex.logout(
@@ -103,10 +100,15 @@ async function start() {
         );
     }) };
 
-    load().then(logon).then(loadMetadata).then(executeMethod).then(logout).then(() => {
-        console.log("All done");
-    });
-
+    try{
+        await load();
+        await logon();
+        await loadMetadata();
+        await executeMethod();
+        await logout();
+    }catch(error){
+        console.error(error);
+    }
 }
 
 try{
@@ -115,7 +117,7 @@ try{
     
     requireFromUrlSync(apiUrl);
     listener(apiUrl, function(){
-        console.log("Loaded!");
+        console.log("Loaded, starting..");
         start();
     });
 
