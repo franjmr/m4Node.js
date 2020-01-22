@@ -9,5 +9,6 @@ const m4apiNode = new M4ApiNode(jsapiServer,usr,pwd);
 m4apiNode.initialize().then( async ()=>{
     await m4apiNode.logonPromise();
     await m4apiNode.logoutPromise();
+    //m4apiNode.logonObservable();
     console.log("All done!")
 });

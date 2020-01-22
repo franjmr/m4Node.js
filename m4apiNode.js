@@ -2,7 +2,7 @@ const jsdom = require("jsdom");
 const requireFromUrlSync = require('require-from-url/sync');
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
-const Rx = require('rxjs');
+const rxjs = require('rxjs');
 
 class M4ApiNode {
 
@@ -73,16 +73,16 @@ class M4ApiNode {
                 (request) => {
                     if (!request.getResult()) {
                         console.log("Logon didn't work");
-                        reject("Logon didn't work");
+                        resolve(false);
                     }
                     else {
                         console.log("ok! Logon Token = " + request.getResult().getToken());
-                        resolve();
+                        resolve(true);
                     }
                 }, 
                 (request) => {
                     console.log("error: logon: " + request.getErrorException());
-                    reject();
+                    reject(request.getErrorException());
                 }
             );
         });
@@ -95,13 +95,29 @@ class M4ApiNode {
             _m4Executor.logout(
                 () => {
                     console.log("Logout done ok!");
-                    resolve();
+                    resolve(true);
                 }, 
                 (request) => {
                     console.log("error: logout: " + request.getErrorException());
                     reject();
                 }
             );
+        });
+    }
+
+    //RXJS Observables
+    logonObservable(){
+        const _logonObservable = rxjs.from(this.logonPromise());
+        _logonObservable.subscribe( value => {
+            console.log("Logon Observable Status: "+value);
+        });
+    };
+
+    logoutObservable(){
+        const _logoutObservable = rxjs.from(this.logoutPromise());
+        _logoutObservable.subscribe( value => {
+            console.log("Logout Observable Status: "+value);
+            this.logonStatus = value;
         });
     }
 
