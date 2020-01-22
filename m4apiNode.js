@@ -20,10 +20,18 @@ class M4ApiNode {
       this.m4Executor = null;
     }
 
+    /**
+     * Set M4Executor
+     * @param {com.meta4.js.client.M4Executor} m4Executor 
+     */
     setM4Executor(m4Executor){
         this.m4Executor = m4Executor;
     }
 
+    /**
+     * Get M4Executor
+     * @returns {com.meta4.js.client.M4Executor} m4Executor 
+     */
     getM4Executor(){
         return this.m4Executor;
     }
@@ -63,6 +71,10 @@ class M4ApiNode {
         this.setM4Executor(m4Executor);
     }
 
+    /**
+     * Logon User
+     * @returns {Promise}
+     */
     logonPromise(){
         const _m4Executor = this.m4Executor;
         const _user = this.user;
@@ -88,6 +100,10 @@ class M4ApiNode {
         });
     }
 
+    /**
+     * Logout User
+     * @returns {Promise}
+     */
     logoutPromise(){
         const _m4Executor = this.m4Executor;
         return new Promise((resolve,reject) => { 
@@ -105,6 +121,11 @@ class M4ApiNode {
         });
     }
 
+    /**
+     * Load Metadata
+     * @param {Array} m4objects 
+     * @returns {Promise}
+     */
     loadMetadataPromise(m4objects) { 
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve,reject) => { 
@@ -121,13 +142,21 @@ class M4ApiNode {
         }) 
     };
 
+    /**
+     * Execute method
+     * @param {String} m4objectId 
+     * @param {String} nodeId 
+     * @param {String} methodId 
+     * @param {String} methodArgs 
+     * @returns {Promise} 
+     */
     executeMethodPromise(m4objectId, nodeId, methodId, methodArgs) { 
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve) => { 
-            let obj = new window.meta4.M4Object(m4objectId);
-            let	node = obj.getNode(nodeId);
-            let req = new window.meta4.M4Request(node.getObject(), node.getId(), methodId, methodArgs);
-            _m4Executor.execute(req,
+            const _obj = new window.meta4.M4Object(m4objectId);
+            const _node = _obj.getNode(nodeId);
+            const _request = new window.meta4.M4Request(_node.getObject(), _node.getId(), methodId, methodArgs);
+            _m4Executor.execute(_request,
                 (request) => {
                     console.log("Method executed ok!");
                     resolve(request);
@@ -140,8 +169,9 @@ class M4ApiNode {
         }) 
     };
 
-
-    //RXJS Observables
+    /**
+     * Logon with RXHS
+     */
     logonObservable(){
         const _logonObservable = rxjs.from(this.logonPromise());
         _logonObservable.subscribe( value => {
@@ -149,6 +179,9 @@ class M4ApiNode {
         });
     };
 
+    /**
+     * Logout with RXHS
+     */
     logoutObservable(){
         const _logoutObservable = rxjs.from(this.logoutPromise());
         _logoutObservable.subscribe( value => {
@@ -156,7 +189,6 @@ class M4ApiNode {
             this.logonStatus = value;
         });
     }
-
 }
 
 module.exports = M4ApiNode;
