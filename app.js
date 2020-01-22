@@ -6,11 +6,13 @@ const M4ApiNode = require('./m4apiNode');
 
 const m4apiNode = new M4ApiNode(jsapiServer,usr,pwd);
 
-async function test(){
+async function startM4ApiNode(){
     await m4apiNode.initialize();
-    m4apiNode.start().then( () =>{
-        console.log("test done!");
+    
+    m4apiNode.logonPromise().then(m4apiNode.logoutPromise).then(()=>{
+        console.log("All done");
     });
+
 };
 
-test();
+startM4ApiNode();

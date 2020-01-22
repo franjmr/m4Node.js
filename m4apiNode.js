@@ -16,9 +16,9 @@ class M4ApiNode {
       this.user = user;
       this.pass = pass;
       this.apiUrl = server + baseFile
+      this.m4Executor = null;
     }
 
-    
     initialize(){
         const { window } = new JSDOM(``, {
             url: this.apiUrl,
@@ -43,52 +43,48 @@ class M4ApiNode {
         });
     }
 
-    async start() {
-    
-        function logon (server,user,pass) { return new Promise((resolve, reject) => { 
+    logonPromise(){
+        const _this = this;
+        return new Promise((resolve, reject) => { 
             console.log("doing logon...");
-            console.log("Server "+server);
-            console.log("User "+user);
-            console.log("Pass "+pass);
-            window.meta4.M4Executor.setServiceBaseUrl(server);
+            window.meta4.M4Executor.setServiceBaseUrl(_this.server);
             let ex = new window.meta4.M4Executor();
-            ex.logon(user, pass, "2", 
-                (x) => {
-                    if (!x.getResult()) {
+            ex.logon(_this.user, _this.pass, "2", 
+                (request) => {
+                    if (!request.getResult()) {
                         console.log("Logon didn't work");
                         reject("Logon didn't work");
                     }
                     else {
-                        console.log("ok! Logon Token = " + x.getResult().getToken());
+                        console.log("ok! Logon Token = " + request.getResult().getToken());
                         resolve();
                     }
                 }, 
-                (x) => {
-                    console.log("error: " + x);
+                (request) => {
+                    console.log("error: logon: " + request.getErrorException());
                     reject();
                 }
             );
-        }) };
-        
-        function logout () { return new Promise((resolve,reject) => { 
+        });
+    }
+
+    logoutPromise(){
+        return new Promise((resolve,reject) => { 
             console.log("executing logout");
             let ex = new window.meta4.M4Executor();
             ex.logout(
-                (x) => {
+                () => {
                     console.log("Logout done ok!");
                     resolve();
                 }, 
-                (x) => {
-                    console.log("error: logout: " + x);
+                (request) => {
+                    console.log("error: logout: " + request.getErrorException());
                     reject();
                 }
             );
-        }) };
-    
-        //await load();
-        await logon(this.server,this.user,this.pass);
-        await logout();
+        });
     }
+
 }
 
 module.exports = M4ApiNode;
