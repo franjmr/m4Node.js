@@ -16,15 +16,13 @@ class M4ApiNode {
       this.user = user;
       this.pass = pass;
       this.apiUrl = server + baseFile
-      this._initializeNode(server, this.apiUrl);
-      requireFromUrlSync(this.apiUrl);
     }
 
     
-    _initializeNode(server, apiUrl){
+    initialize(){
         const { window } = new JSDOM(``, {
-            url: apiUrl,
-            referrer: server,
+            url: this.apiUrl,
+            referrer: this.server,
             contentType: "text/html",
             includeNodeLocations: true,
             storageQuota: 10000000
@@ -34,27 +32,18 @@ class M4ApiNode {
         global.document = window.document;
         global.navigator = window.navigator;
         global.DOMParser = window.DOMParser;
-    }
 
-    async waitForMeta4OnLoad(){
-        const load = new Promise((resolve) => { 
-            window.meta4OnLoad = function meta4OnLoad() {
-                console.log("jsapi loaded!");
-                resolve(true);
-            }
-        });
-        await load;
-        return load;
-    }
+        requireFromUrlSync(this.apiUrl);
 
-    async start() {
-    
-        function load() { return new Promise((resolve) => { 
+        return new Promise((resolve) => { 
             window.meta4OnLoad = function meta4OnLoad() {
                 console.log("jsapi loaded!");
                 resolve();
             }
-        })};
+        });
+    }
+
+    async start() {
     
         function logon (server,user,pass) { return new Promise((resolve, reject) => { 
             console.log("doing logon...");
@@ -99,9 +88,7 @@ class M4ApiNode {
         //await load();
         await logon(this.server,this.user,this.pass);
         await logout();
-
     }
-    
 }
 
 module.exports = M4ApiNode;

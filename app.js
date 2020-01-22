@@ -6,8 +6,11 @@ const M4ApiNode = require('./m4apiNode');
 
 const m4apiNode = new M4ApiNode(jsapiServer,usr,pwd);
 
-m4apiNode.waitForMeta4OnLoad().then((value) =>{
-    if(value){
-        m4apiNode.start();
-    }
-});
+async function test(){
+    await m4apiNode.initialize();
+    m4apiNode.start().then( () =>{
+        console.log("test done!");
+    });
+};
+
+test();
