@@ -2,6 +2,7 @@ const jsdom = require("jsdom");
 const requireFromUrlSync = require('require-from-url/sync');
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
+const Rx = require('rxjs');
 
 class M4ApiNode {
 
@@ -16,7 +17,6 @@ class M4ApiNode {
       this.user = user;
       this.pass = pass;
       this.apiUrl = server + baseFile
-      this.m4Executor = null;
     }
 
     initialize(){
