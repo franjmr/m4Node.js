@@ -17,9 +17,18 @@ class M4ApiNode {
       this.user = user;
       this.pass = pass;
       this.apiUrl = server + baseFile
+      this.m4Executor = null;
     }
 
-    initialize(){
+    setM4Executor(m4Executor){
+        this.m4Executor = m4Executor;
+    }
+
+    getM4Executor(){
+        return this.m4Executor;
+    }
+
+    async initialize(){
         const { window } = new JSDOM(``, {
             url: this.apiUrl,
             referrer: this.server,
@@ -35,21 +44,32 @@ class M4ApiNode {
 
         requireFromUrlSync(this.apiUrl);
 
-        return new Promise((resolve) => { 
-            window.meta4OnLoad = function meta4OnLoad() {
-                console.log("jsapi loaded!");
-                resolve();
-            }
-        });
+        function loadM4Library(){
+            return new Promise((resolve) => { 
+                window.meta4OnLoad = function meta4OnLoad() {
+                    console.log("jsapi loaded!");
+                    resolve();
+                }
+            });
+        }
+
+        function createM4Executor(server){
+            window.meta4.M4Executor.setServiceBaseUrl(server);
+            return new window.meta4.M4Executor()
+        }
+
+        await loadM4Library();
+        const m4Executor = createM4Executor(this.server);
+        this.setM4Executor(m4Executor);
     }
 
     logonPromise(){
-        const _this = this;
+        const _m4Executor = this.m4Executor;
+        const _user = this.user;
+        const _pass = this.pass;
         return new Promise((resolve, reject) => { 
             console.log("doing logon...");
-            window.meta4.M4Executor.setServiceBaseUrl(_this.server);
-            let ex = new window.meta4.M4Executor();
-            ex.logon(_this.user, _this.pass, "2", 
+            _m4Executor.logon(_user, _pass, "2", 
                 (request) => {
                     if (!request.getResult()) {
                         console.log("Logon didn't work");
@@ -69,10 +89,10 @@ class M4ApiNode {
     }
 
     logoutPromise(){
+        const _m4Executor = this.m4Executor;
         return new Promise((resolve,reject) => { 
             console.log("executing logout");
-            let ex = new window.meta4.M4Executor();
-            ex.logout(
+            _m4Executor.logout(
                 () => {
                     console.log("Logout done ok!");
                     resolve();
