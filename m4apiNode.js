@@ -105,6 +105,42 @@ class M4ApiNode {
         });
     }
 
+    loadMetadataPromise(m4objects) { 
+        const _m4Executor = this.getM4Executor();
+        return new Promise((resolve,reject) => { 
+            _m4Executor.loadMetadata(m4objects, 
+                () => {
+                    console.log("Metadata loaded ok!");
+                    resolve();
+                }, 
+                (request) => {
+                    console.log("error: Loading metadata: " + request.getErrorException());
+                    reject();
+                }
+            );
+        }) 
+    };
+
+    executeMethodPromise(m4objectId, nodeId, methodId, methodArgs) { 
+        const _m4Executor = this.getM4Executor();
+        return new Promise((resolve) => { 
+            let obj = new window.meta4.M4Object(m4objectId);
+            let	node = obj.getNode(nodeId);
+            let req = new window.meta4.M4Request(node.getObject(), node.getId(), methodId, methodArgs);
+            _m4Executor.execute(req,
+                (request) => {
+                    console.log("Method executed ok!");
+                    resolve(request);
+                }, 
+                (request) => {
+                    console.log("error: Method executed: " + request.getErrorException());;
+                    resolve();
+                }
+            );
+        }) 
+    };
+
+
     //RXJS Observables
     logonObservable(){
         const _logonObservable = rxjs.from(this.logonPromise());
