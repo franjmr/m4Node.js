@@ -1,4 +1,4 @@
-const M4ApiNode = require('./m4apiNode');
+import { M4ApiNode }  from './m4apiNode';
 
 const jsapiServer = 'http://franciscocaw10.meta4.com:5020/' ;
 const usr = "ORLIEMOBILE";

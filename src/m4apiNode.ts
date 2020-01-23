@@ -1,36 +1,61 @@
-const jsdom = require("jsdom");
-const requireFromUrlSync = require('require-from-url/sync');
+import jsdom = require("jsdom");
+import requireFromUrlSync = require('require-from-url/sync');
+import rxjs = require('rxjs');
+import { M4Executor } from './m4Interfaces/M4Executor';
+import { M4Request } from './m4Interfaces/M4Request';
+
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
-const rxjs = require('rxjs');
 
-class M4ApiNode {
+declare global {
+    namespace NodeJS {
+        interface Global {
+            document: Document;
+            window: Window;
+            navigator: Navigator;
+            DOMParser: DOMParser;
+        }
+    }
+}
+
+declare global {
+    interface Window {
+        meta4: any;
+    } 
+}
+
+export class M4ApiNode {
+
+    server: string;
+    user: string;
+    pass: string;
+    apiUrl: string;
+    m4Executor: M4Executor
 
     /**
-     * 
-     * @param {string} server 
-     * @param {string} user 
-     * @param {string} pass 
+     * Constructor
+     * @param {string} server
+     * @param {string} user
+     * @param {string} pass
      */
-    constructor(server, user, pass) {
+    constructor(server: string, user:string, pass:string) {
       this.server = server;
       this.user = user;
       this.pass = pass;
       this.apiUrl = server + baseFile
-      this.m4Executor = null;
     }
 
     /**
      * Set M4Executor
-     * @param {com.meta4.js.client.M4Executor} m4Executor 
+     * @param {com.meta4.js.client.M4Executor} m4Executor
      */
-    setM4Executor(m4Executor){
+    setM4Executor(m4Executor: M4Executor){
         this.m4Executor = m4Executor;
     }
 
     /**
      * Get M4Executor
-     * @returns {com.meta4.js.client.M4Executor} m4Executor 
+     * @returns {com.meta4.js.client.M4Executor} m4Executor
      */
     getM4Executor(){
         return this.m4Executor;
@@ -44,7 +69,7 @@ class M4ApiNode {
             includeNodeLocations: true,
             storageQuota: 10000000
         });
-        
+
         global.window = window;
         global.document = window.document;
         global.navigator = window.navigator;
@@ -75,20 +100,20 @@ class M4ApiNode {
      * Logon User
      * @returns {Promise}
      */
-    logonPromise(){
+    logonPromise(): Promise<boolean>{
         const _m4Executor = this.m4Executor;
         const _user = this.user;
         const _pass = this.pass;
         return new Promise((resolve, reject) => { 
             console.log("doing logon...");
             _m4Executor.logon(_user, _pass, "2", 
-                (request) => {
+                (request: M4Request) => {
                     if (!request.getResult()) {
                         console.log("Logon didn't work");
                         resolve(false);
                     }
                     else {
-                        console.log("ok! Logon Token = " + request.getResult().getToken());
+                        // console.log("ok! Logon Token = " + request.getResult().getToken());
                         resolve(true);
                     }
                 }, 
@@ -104,18 +129,18 @@ class M4ApiNode {
      * Logout User
      * @returns {Promise}
      */
-    logoutPromise(){
+    logoutPromise(): Promise<boolean>{
         const _m4Executor = this.m4Executor;
-        return new Promise((resolve,reject) => { 
+        return new Promise((resolve) => { 
             console.log("executing logout");
             _m4Executor.logout(
                 () => {
                     console.log("Logout done ok!");
                     resolve(true);
                 }, 
-                (request) => {
+                (request: M4Request) => {
                     console.log("error: logout: " + request.getErrorException());
-                    reject();
+                    resolve(false);
                 }
             );
         });
@@ -126,17 +151,17 @@ class M4ApiNode {
      * @param {Array} m4objects 
      * @returns {Promise}
      */
-    loadMetadataPromise(m4objects) { 
+    loadMetadataPromise(m4objects: string[]): Promise<boolean> { 
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve,reject) => { 
             _m4Executor.loadMetadata(m4objects, 
                 () => {
                     console.log("Metadata loaded ok!");
-                    resolve();
+                    resolve(true);
                 }, 
-                (request) => {
+                (request: M4Request) => {
                     console.log("error: Loading metadata: " + request.getErrorException());
-                    reject();
+                    reject(false);
                 }
             );
         }) 
@@ -150,18 +175,18 @@ class M4ApiNode {
      * @param {String} methodArgs 
      * @returns {Promise} 
      */
-    executeMethodPromise(m4objectId, nodeId, methodId, methodArgs) { 
+    executeMethodPromise(m4objectId: string, nodeId: string, methodId: string, methodArgs: string): Promise<object> { 
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve) => { 
             const _obj = new window.meta4.M4Object(m4objectId);
             const _node = _obj.getNode(nodeId);
             const _request = new window.meta4.M4Request(_node.getObject(), _node.getId(), methodId, methodArgs);
             _m4Executor.execute(_request,
-                (request) => {
+                (request: M4Request) => {
                     console.log("Method executed ok!");
                     resolve(request);
                 }, 
-                (request) => {
+                (request: M4Request) => {
                     console.log("error: Method executed: " + request.getErrorException());;
                     resolve();
                 }
@@ -186,9 +211,6 @@ class M4ApiNode {
         const _logoutObservable = rxjs.from(this.logoutPromise());
         _logoutObservable.subscribe( value => {
             console.log("Logout Observable Status: "+value);
-            this.logonStatus = value;
         });
     }
 }
-
-module.exports = M4ApiNode;
