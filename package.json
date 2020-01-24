@@ -1,7 +1,7 @@
 {
-  "name": "jsapi-node",
+  "name": "@franjmr/m4-node-api",
   "version": "1.0.0",
-  "description": "JSAPI inside node.js",
+  "description": "M4NodeApi inside Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
@@ -22,8 +22,12 @@
     "prepublish": "tsc",
     "start": "tsc && node dist/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/franjmr/api_callback2promise2rxjs.git"
+  },
   "keywords": [
-    "jsapi"
+    "m4-node-api"
   ],
   "author": "franjmr",
   "license": "ISC"
