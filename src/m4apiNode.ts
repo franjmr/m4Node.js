@@ -55,9 +55,9 @@ export class M4ApiNode {
 
     /**
      * Get M4Executor
-     * @returns {com.meta4.js.client.M4Executor} m4Executor
+     * @returns {M4Executor} m4Executor
      */
-    getM4Executor(){
+    getM4Executor(): M4Executor{
         return this.m4Executor;
     }
 
@@ -86,7 +86,7 @@ export class M4ApiNode {
             });
         }
 
-        function createM4Executor(server){
+        function createM4Executor(server: string){
             window.meta4.M4Executor.setServiceBaseUrl(server);
             return new window.meta4.M4Executor()
         }
@@ -101,7 +101,7 @@ export class M4ApiNode {
      * @returns {Promise}
      */
     logonPromise(): Promise<boolean>{
-        const _m4Executor = this.m4Executor;
+        const _m4Executor = this.getM4Executor();
         const _user = this.user;
         const _pass = this.pass;
         return new Promise((resolve, reject) => { 
@@ -117,7 +117,7 @@ export class M4ApiNode {
                         resolve(true);
                     }
                 }, 
-                (request) => {
+                (request: M4Request) => {
                     console.log("error: logon: " + request.getErrorException());
                     reject(request.getErrorException());
                 }
@@ -130,7 +130,7 @@ export class M4ApiNode {
      * @returns {Promise}
      */
     logoutPromise(): Promise<boolean>{
-        const _m4Executor = this.m4Executor;
+        const _m4Executor = this.getM4Executor();
         return new Promise((resolve) => { 
             console.log("executing logout");
             _m4Executor.logout(
