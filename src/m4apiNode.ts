@@ -21,6 +21,7 @@ declare global {
 declare global {
     interface Window {
         meta4: any;
+        meta4OnLoad: any
     } 
 }
 
@@ -46,19 +47,38 @@ export class M4ApiNode {
     }
 
     /**
-     * Set M4Executor
-     * @param {com.meta4.js.client.M4Executor} m4Executor
-     */
-    setM4Executor(m4Executor: M4Executor){
-        this.m4Executor = m4Executor;
-    }
-
-    /**
      * Get M4Executor
      * @returns {M4Executor} m4Executor
      */
     getM4Executor(): M4Executor{
         return this.m4Executor;
+    }
+
+    /**
+     * Set M4Executor
+     * @param {com.meta4.js.client.M4Executor} m4Executor
+     */
+    private setM4Executor(m4Executor: M4Executor){
+        this.m4Executor = m4Executor;
+    }
+
+
+    /**
+     * Resolve M4JSAPI is loaded in context
+     * @returns {Promise}
+     */
+    private isM4JsapiLoaded(): Promise<boolean> {
+        return new Promise((resolve) => { 
+            window.meta4OnLoad = function meta4OnLoad() {
+                console.log("M4JSAPI loaded!");
+                resolve(true);
+            }
+        });
+    }
+
+    private createM4Executor(){
+        window.meta4.M4Executor.setServiceBaseUrl(this.server);
+        this.setM4Executor(new window.meta4.M4Executor());
     }
 
     async initialize(){
@@ -77,23 +97,8 @@ export class M4ApiNode {
 
         requireFromUrlSync(this.apiUrl);
 
-        function loadM4Library(){
-            return new Promise((resolve) => { 
-                window.meta4OnLoad = function meta4OnLoad() {
-                    console.log("jsapi loaded!");
-                    resolve();
-                }
-            });
-        }
-
-        function createM4Executor(server: string){
-            window.meta4.M4Executor.setServiceBaseUrl(server);
-            return new window.meta4.M4Executor()
-        }
-
-        await loadM4Library();
-        const m4Executor = createM4Executor(this.server);
-        this.setM4Executor(m4Executor);
+        await this.isM4JsapiLoaded();
+        this.createM4Executor();
     }
 
     /**
