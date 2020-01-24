@@ -175,7 +175,7 @@ export class M4ApiNode {
      * @param {String} methodArgs 
      * @returns {Promise} 
      */
-    executeMethodPromise(m4objectId: string, nodeId: string, methodId: string, methodArgs: string): Promise<object> { 
+    executeMethodPromise(m4objectId: string, nodeId: string, methodId: string, methodArgs: string[]): Promise<M4Request> { 
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve) => { 
             const _obj = new window.meta4.M4Object(m4objectId);
