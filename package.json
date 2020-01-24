@@ -2,7 +2,7 @@
   "name": "jsapi-node",
   "version": "1.0.0",
   "description": "JSAPI inside node.js",
-  "main": "dist/app.js",
+  "main": "dist/index.js",
   "dependencies": {
     "require-from-url": "^3.1.3",
     "rxjs": "^6.5.4",
@@ -18,7 +18,7 @@
   },
   "scripts": {
     "test": "jest",
-    "start": "tsc && node dist/app.js"
+    "start": "tsc && node dist/index.js"
   },
   "keywords": [
     "jsapi"
