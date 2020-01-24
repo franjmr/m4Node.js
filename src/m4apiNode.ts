@@ -51,6 +51,9 @@ export class M4ApiNode {
      * @returns {M4Executor} m4Executor
      */
     getM4Executor(): M4Executor{
+        if(!this.m4Executor){
+            this.createM4Executor();
+        }
         return this.m4Executor;
     }
 
@@ -98,7 +101,6 @@ export class M4ApiNode {
         requireFromUrlSync(this.apiUrl);
 
         await this.isM4JsapiLoaded();
-        this.createM4Executor();
     }
 
     /**
