@@ -1,6 +1,6 @@
 {
   "name": "@franjmr/m4-node-api",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "M4NodeApi inside Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,8 @@
   },
   "scripts": {
     "test": "jest",
-    "prepublish": "tsc",
+    "build": "tsc",
+    "deploy": "npm publish",
     "start": "tsc && node dist/index.js"
   },
   "repository": {
