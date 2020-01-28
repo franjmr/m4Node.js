@@ -100,9 +100,9 @@ export class M4ApiNode {
 
         requireFromUrlSync(this.apiUrl);
 
-        await this.isM4JsapiLoaded();
+        const bIsM4JsapiLoaded = await this.isM4JsapiLoaded();
 
-        return true;
+        return bIsM4JsapiLoaded;
     }
 
     /**
