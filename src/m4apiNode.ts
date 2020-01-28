@@ -84,7 +84,7 @@ export class M4ApiNode {
         this.setM4Executor(new window.meta4.M4Executor());
     }
 
-    async initialize(){
+    async initializeAsync(){
         const { window } = new JSDOM(``, {
             url: this.apiUrl,
             referrer: this.server,
@@ -101,6 +101,8 @@ export class M4ApiNode {
         requireFromUrlSync(this.apiUrl);
 
         await this.isM4JsapiLoaded();
+
+        return true;
     }
 
     /**
