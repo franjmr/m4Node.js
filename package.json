@@ -1,6 +1,6 @@
 {
   "name": "@franjmr/m4-node-api",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "description": "M4NodeApi inside Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "deploy": "npm publish",
+    "deploy": "tsc && npm publish",
     "exampleDev": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.ts",
     "examplePro": "tsc && node ./dist/_examples/app.js"
   },
