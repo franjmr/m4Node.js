@@ -1,5 +1,14 @@
 export interface M4Node {
-    getValue(key:string): any
-    moveTo(idx: number): any
-    count(): number
+  addRecord(): void;
+  count(): number;
+  getCurrent(): number;
+  getValue(itemId: string): any;
+  getValues(itemIds: string[], recordIndex: number): any;
+  isModified(): boolean;
+  isNew(): boolean;
+  isToDelete(): boolean;
+  moveTo(index: number): any;
+  moveToEOF(): any;
+  setToDelete(): any;
+  setValue(itemId: string, value: any): any;
 }

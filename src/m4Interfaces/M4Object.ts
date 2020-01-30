@@ -1,3 +1,5 @@
+import { M4Node } from "./M4Node";
+
 export interface M4Object {
-    getNode(node:string): any;
+    getNode(nodeId:string): M4Node;
 }
