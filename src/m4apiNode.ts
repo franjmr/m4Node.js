@@ -3,7 +3,6 @@ import requireFromUrl = require('require-from-url/async');
 import rxjs = require('rxjs');
 import { M4Executor } from './m4Interfaces/M4Executor';
 import { M4Request } from './m4Interfaces/M4Request';
-import memstore = require("tough-cookie/lib/memstore.js");
 import tough = require('tough-cookie');
 
 const { JSDOM } = jsdom;
@@ -46,7 +45,7 @@ export class M4ApiNode {
       this.user = user;
       this.pass = pass;
       this.apiUrl = server + baseFile;
-      this.m4Store = new memstore.MemoryCookieStore();
+      this.m4Store = new tough.MemoryCookieStore();
       this.m4CookieStore = new tough.CookieJar(this.m4Store);
     }
 
