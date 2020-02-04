@@ -19,16 +19,11 @@ declare global {
             DOMParser: DOMParser;
         }
     }
-}
-
-declare global {
     interface Window {
         meta4: any;
         meta4OnLoad: any
     } 
 }
-
-
 export class M4ApiNode {
 
     server: string;
