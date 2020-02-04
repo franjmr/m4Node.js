@@ -134,6 +134,8 @@ export class M4ApiNode {
 
             const bIsM4JsapiLoaded = await this.isM4JsapiLoaded();
 
+            // this.m4Window = m4NodeJs.window;
+
             return bIsM4JsapiLoaded;
         }else{
             console.log("Loading global Meta4...");
