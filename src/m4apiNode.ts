@@ -1,5 +1,5 @@
 import jsdom = require("jsdom");
-import requireFromUrlAsync = require('require-from-url/async');
+import requireFromUrl = require('require-from-url/async');
 import rxjs = require('rxjs');
 import { M4Executor } from './m4Interfaces/M4Executor';
 import { M4Request } from './m4Interfaces/M4Request';
@@ -129,14 +129,16 @@ export class M4ApiNode {
             global.document = m4NodeJs.document;
             global.navigator = m4NodeJs.navigator;
             global.DOMParser = m4NodeJs.DOMParser;
-    
-            await requireFromUrlAsync([this.apiUrl]);
+
+            await requireFromUrl([this.apiUrl]);
+
             const bIsM4JsapiLoaded = await this.isM4JsapiLoaded();
-    
+
             return bIsM4JsapiLoaded;
         }else{
             console.log("Loading global Meta4...");
-            m4NodeJs.window.meta4 = global.window.meta4;
+            m4NodeJs.window = Object.assign({}, global.window);
+            this.m4Window = m4NodeJs.window;
             return true;
         }
     }
