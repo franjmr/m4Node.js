@@ -1,9 +1,11 @@
 import jsdom = require("jsdom");
-import requireFromUrl = require('require-from-url/async');
 import rxjs = require('rxjs');
 import { M4Executor } from './m4Interfaces/M4Executor';
 import { M4Request } from './m4Interfaces/M4Request';
 import tough = require('tough-cookie');
+import http = require('http');
+import vm  = require('vm');
+import concat = require('concat-stream');
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -53,11 +55,28 @@ export class M4ApiNode {
      * Get M4Executor
      * @returns {M4Executor} m4Executor
      */
-    getM4Executor(): M4Executor{
+    private getM4Executor(): M4Executor{
         if(!this.m4Executor){
             this.createM4Executor();
         }
         return this.m4Executor;
+    }
+
+    /**
+     * Import M4JSAPI from apiUrl property
+     */
+    private importM4Jsapi(){
+        console.log("Loading M4JSAPI from url: "+this.apiUrl);
+        const apiUrl = this.apiUrl;
+        return new Promise((resolve) => { 
+            http.get( apiUrl, (res) => {
+                res.setEncoding('utf8');
+                res.pipe(concat({ encoding: 'string' }, (remoteSrc) => {
+                  vm.runInThisContext(remoteSrc, 'remote_modules/m4jsapi_node.js');
+                  resolve(true);
+                }));
+            });
+        });
     }
 
     /**
@@ -93,8 +112,6 @@ export class M4ApiNode {
     }
 
     async initializeAsync(){
-        let alreadyLoaded = false;
-
         const { window } = new JSDOM(``, {
             url: this.apiUrl,
             referrer: this.server,
@@ -106,68 +123,47 @@ export class M4ApiNode {
 
         this.m4Window = window;
 
-        if(!global.M4nodejs){
-            console.log("M4JSAPI Initial Load!");
-            global.M4nodejs = new Map<string,any>();
-        }else{
+        if(global.window && global.window.meta4){
             console.log("M4JSAPI Already loaded!");
-            alreadyLoaded = true;
-        }
+            this.m4Window = Object.assign({}, global.window);
+            return true;
+        }else{
+            console.log("M4JSAPI Initial Load!");
+            global.window = this.m4Window;
+            global.document = this.m4Window.document;
+            global.navigator = this.m4Window.navigator;
+            global.DOMParser = this.m4Window.DOMParser;
 
-        const m4NodeJs = {
-            window: this.m4Window,
-            document: this.m4Window.document,
-            navigator: this.m4Window.navigator,
-            DOMParser: this.m4Window.DOMParser
-        }
-        
-        global.M4nodejs.set(this.user, m4NodeJs)
-
-        if(alreadyLoaded === false) {
-            global.window = m4NodeJs.window;
-            global.document = m4NodeJs.document;
-            global.navigator = m4NodeJs.navigator;
-            global.DOMParser = m4NodeJs.DOMParser;
-
-            await requireFromUrl([this.apiUrl]);
+            await this.importM4Jsapi();
 
             const bIsM4JsapiLoaded = await this.isM4JsapiLoaded();
-
-            // this.m4Window = m4NodeJs.window;
-
             return bIsM4JsapiLoaded;
-        }else{
-            console.log("Loading global Meta4...");
-            m4NodeJs.window = Object.assign({}, global.window);
-            this.m4Window = m4NodeJs.window;
-            return true;
         }
     }
 
     /**
      * Logon User
-     * @returns {Promise}
      */
-    logonPromise(): Promise<boolean>{
+    logonPromise(): Promise<string>{
         const _m4Executor = this.getM4Executor();
         const _user = this.user;
         const _pass = this.pass;
         return new Promise((resolve, reject) => { 
-            console.log("doing logon with user "+_user);
+            console.log("Doing logon with user: "+_user+"...");
             _m4Executor.logon(_user, _pass, "2", 
                 (request: M4Request) => {
                     if (!request.getResult()) {
                         console.log("Logon didn't work");
-                        resolve(false);
-                    }
-                    else {
-                        console.log("ok! Logon Token = " + request.getResult().getToken());
-                        resolve(true);
+                        reject();
+                    }else {
+                        const logonToken = request.getResult().getToken();
+                        console.log("Logon Success! Token = " + logonToken);
+                        resolve(logonToken);
                     }
                 }, 
                 (request: M4Request) => {
-                    console.log("error: logon: " + request.getErrorException());
-                    console.log("error msg: logon "+ request.getErrorMessage());
+                    console.log("Error - logon: " + request.getErrorException());
+                    console.log("Error message logon: "+ request.getErrorMessage());
                     reject(request.getErrorException());
                 }
             );
@@ -176,19 +172,18 @@ export class M4ApiNode {
 
     /**
      * Logout User
-     * @returns {Promise}
      */
     logoutPromise(): Promise<boolean>{
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve) => { 
-            console.log("executing logout");
+            console.log("Executing logout...");
             _m4Executor.logout(
                 () => {
                     console.log("Logout done ok!");
                     resolve(true);
                 }, 
                 (request: M4Request) => {
-                    console.log("error: logout: " + request.getErrorException());
+                    console.log("Error logout: " + request.getErrorException());
                     resolve(false);
                 }
             );
@@ -198,7 +193,6 @@ export class M4ApiNode {
     /**
      * Load Metadata
      * @param {Array} m4objects 
-     * @returns {Promise}
      */
     loadMetadataPromise(m4objects: string[]): Promise<boolean> { 
         const _m4Executor = this.getM4Executor();
@@ -209,7 +203,7 @@ export class M4ApiNode {
                     resolve(true);
                 }, 
                 (request: M4Request) => {
-                    console.log("error: Loading metadata: " + request.getErrorException());
+                    console.log("Error loading metadata: " + request.getErrorException());
                     reject(false);
                 }
             );
@@ -222,9 +216,8 @@ export class M4ApiNode {
      * @param {String} nodeId 
      * @param {String} methodId 
      * @param {String} methodArgs 
-     * @returns {Promise} 
      */
-    executeMethodPromise(m4objectId: string, nodeId: string, methodId: string, methodArgs: string[]): Promise<M4Request> { 
+    executeMethodPromise(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request> { 
         const _m4Executor = this.getM4Executor();
         const _localWindow = this.getWindow();
         return new Promise((resolve) => { 
@@ -247,20 +240,28 @@ export class M4ApiNode {
     /**
      * Logon with RXHS
      */
-    logonObservable(){
+    logonObservable(): rxjs.Observable<string>{
         const _logonObservable = rxjs.from(this.logonPromise());
-        _logonObservable.subscribe( value => {
-            console.log("Logon Observable Status: "+value);
-        });
+        return _logonObservable;
     };
 
     /**
      * Logout with RXHS
      */
-    logoutObservable(){
+    logoutObservable(): rxjs.Observable<boolean>{
         const _logoutObservable = rxjs.from(this.logoutPromise());
-        _logoutObservable.subscribe( value => {
-            console.log("Logout Observable Status: "+value);
-        });
+        return _logoutObservable;
+    }
+
+    /**
+     * Execute method with RXHS
+     * @param m4objectId 
+     * @param nodeId 
+     * @param methodId 
+     * @param methodArgs 
+     */
+    executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>{
+        const _executeMethodObservable = rxjs.from(this.executeMethodPromise(m4objectId, nodeId, methodId, methodArgs));
+        return _executeMethodObservable;
     }
 }
