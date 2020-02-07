@@ -6,6 +6,7 @@ import tough = require('tough-cookie');
 import http = require('http');
 import vm  = require('vm');
 import concat = require('concat-stream');
+import { M4Node } from "./m4Interfaces/M4Node";
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -56,6 +57,7 @@ export class M4ApiNode {
      * @returns {M4Executor} m4Executor
      */
     private getM4Executor(): M4Executor{
+        global.window = null;
         if(!this.m4Executor){
             this.createM4Executor();
         }
@@ -123,22 +125,16 @@ export class M4ApiNode {
 
         this.m4Window = window;
 
-        if(global.window && global.window.meta4){
-            console.log("M4JSAPI Already loaded!");
-            this.m4Window = Object.assign({}, global.window);
-            return true;
-        }else{
-            console.log("M4JSAPI Initial Load!");
-            global.window = this.m4Window;
-            global.document = this.m4Window.document;
-            global.navigator = this.m4Window.navigator;
-            global.DOMParser = this.m4Window.DOMParser;
+        console.log("M4JSAPI Initial Load!");
+        global.window = this.m4Window;
+        global.document = this.m4Window.document;
+        global.navigator = this.m4Window.navigator;
+        global.DOMParser = this.m4Window.DOMParser;
 
-            await this.importM4Jsapi();
+        await this.importM4Jsapi();
 
-            const bIsM4JsapiLoaded = await this.isM4JsapiLoaded();
-            return bIsM4JsapiLoaded;
-        }
+        const bIsM4JsapiLoaded = await this.isM4JsapiLoaded();
+        return bIsM4JsapiLoaded;
     }
 
     /**
@@ -263,5 +259,17 @@ export class M4ApiNode {
     executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>{
         const _executeMethodObservable = rxjs.from(this.executeMethodPromise(m4objectId, nodeId, methodId, methodArgs));
         return _executeMethodObservable;
+    }
+
+    createM4NodeObservable(m4Node : M4Node): rxjs.Observable<any> {
+        const _localWindow = this.getWindow();
+        const observable = new rxjs.Observable(subscriber => {
+            function subscriberFunc(itemValue:any){
+                subscriber.next(itemValue);
+                subscriber.complete();
+            }
+            m4Node.register(_localWindow.meta4.M4EventTypes.getItemChanged(), subscriberFunc.bind(this), null);
+          });
+        return observable
     }
 }

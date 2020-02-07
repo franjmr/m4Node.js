@@ -1,6 +1,7 @@
 import { M4ApiNode } from "../m4apiNode";
+import { M4Node } from "../m4Interfaces/M4Node";
 
-const server = "http://franciscocaw10.meta4.com:5020";
+const server = "http://arya.meta4.com:5020";
 const user01 = "NOMINAM";
 const pass01 = "123";
 const user02 = "ORLIEMOBILE";
@@ -43,7 +44,7 @@ async function example(){
     }
     
 
-    // Execute Instance 01
+    // Execute Instance 02
     await m4apiNode02.loadMetadataPromise(['PLCO_LOAD_ALL_PERSONAL_INFO']);
     const request02 = await m4apiNode02.executeMethodPromise("PLCO_LOAD_ALL_PERSONAL_INFO", "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
     const objRequest02 = request02.getObject();
@@ -61,6 +62,24 @@ async function example(){
             console.log("====================================================================================");
         });
     }
+
+    // Observable
+    console.log("============================ Observables ============================");
+    const m4node = request02.getObject().getNode("PSCO_EMPLOYEE_RECORD_HEADER");
+    const m4NodeObservable = m4apiNode02.createM4NodeObservable(m4node);
+    const m4EmployeName = m4node.getValue("PSCO_EMPLOYEE_NAME");
+    console.log('EMPLOYE NAME before subscribe '+m4EmployeName);
+
+    m4NodeObservable.subscribe({
+        next(node:M4Node) { console.log('Observale - New value: ' + node.getValue("PSCO_EMPLOYEE_NAME")); },
+        error(err) { console.error('Observale - something wrong occurred: ' + err); },
+        complete() { console.log('Observale - done'); }
+    });
+
+    console.log('EMPLOYE NAME after subscribe...');
+    m4node.setValue("PSCO_EMPLOYEE_NAME","Jin Kazama");
+
+    // END EXAMPLES
 
     // Logout instances
     await m4apiNode01.logoutPromise();

@@ -11,4 +11,5 @@ export interface M4Node {
   moveToEOF(): any;
   setToDelete(): any;
   setValue(itemId: string, value: any): any;
+  register(eventType : any,callback: any, context: any): boolean
 }
