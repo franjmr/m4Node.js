@@ -28,14 +28,14 @@ declare global {
 }
 export class M4ApiNode {
 
-    server: string;
-    user: string;
-    pass: string;
-    apiUrl: string;
-    m4Executor: M4Executor;
-    m4Window : any;
-    m4Store: tough.MemoryCookieStore;
-    m4CookieStore: tough.CookieJar;
+    private server: string;
+    private user: string;
+    private pass: string;
+    private apiUrl: string;
+    private m4Executor: M4Executor;
+    private m4Window : any;
+    private m4Store: tough.MemoryCookieStore;
+    private m4CookieStore: tough.CookieJar;
 
     /**
      * Constructor
@@ -50,6 +50,22 @@ export class M4ApiNode {
       this.apiUrl = server + baseFile;
       this.m4Store = new tough.MemoryCookieStore();
       this.m4CookieStore = new tough.CookieJar(this.m4Store);
+    }
+
+    getUser(): string {
+        return this.user;
+    }
+
+    getServer(): string {
+        return this.server;
+    }
+
+    getApiUrl(): string {
+        return this.apiUrl;
+    }
+
+    getCookieStore(): tough.MemoryCookieStore{
+        return this.m4Store;
     }
 
     /**
@@ -67,7 +83,7 @@ export class M4ApiNode {
     /**
      * Import M4JSAPI from apiUrl property
      */
-    private importM4Jsapi(){
+    private importM4Jsapi(): Promise<boolean>{
         console.log("Loading M4JSAPI from url: "+this.apiUrl);
         const apiUrl = this.apiUrl;
         return new Promise((resolve) => { 
@@ -89,7 +105,6 @@ export class M4ApiNode {
         this.m4Executor = m4Executor;
     }
 
-
     /**
      * Resolve M4JSAPI is loaded in context
      * @returns {Promise}
@@ -103,17 +118,26 @@ export class M4ApiNode {
         });
     }
 
-    private getWindow(){
+    /**
+     * Return jsdom.DOMWindow from instance
+     */
+    private getWindow() : jsdom.DOMWindow{
         return this.m4Window;
     }
 
-    private createM4Executor(){
+    /**
+     * Create M4Executor instance
+     */
+    private createM4Executor(): void{
         const localWindow = this.getWindow();
         localWindow.meta4.M4Executor.setServiceBaseUrl(this.server);
         this.setM4Executor(new localWindow.meta4.M4Executor());
     }
 
-    async initializeAsync(){
+    /**
+     * Initialize M4jsapi instance as jsdom.DOMWindow
+     */
+    async initializeAsync(): Promise<boolean>{
         const { window } = new JSDOM(``, {
             url: this.apiUrl,
             referrer: this.server,
@@ -138,7 +162,20 @@ export class M4ApiNode {
     }
 
     /**
-     * Logon User
+     * Load M4Object Metadata and execute M4Request asynchronous
+     * @param m4objectId 
+     * @param nodeId 
+     * @param methodId 
+     * @param methodArgs 
+     */
+    async executeMethodExtendAsync(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request>{
+        await this.loadMetadataPromise([m4objectId]);
+        const executeMethodPromise = await this.executeMethodPromise(m4objectId,nodeId,methodId, methodArgs);
+        return executeMethodPromise;
+    }
+
+    /**
+     * Logon User promise-based asynchronous
      */
     logonPromise(): Promise<string>{
         const _m4Executor = this.getM4Executor();
@@ -167,7 +204,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Logout User
+     * Logout User promise-based asynchronous
      */
     logoutPromise(): Promise<boolean>{
         const _m4Executor = this.getM4Executor();
@@ -187,7 +224,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Load Metadata
+     * Load Metadata promise-based asynchronous
      * @param {Array} m4objects 
      */
     loadMetadataPromise(m4objects: string[]): Promise<boolean> { 
@@ -207,7 +244,7 @@ export class M4ApiNode {
     };
 
     /**
-     * Execute method
+     * Execute method promise-based asynchronous
      * @param {String} m4objectId 
      * @param {String} nodeId 
      * @param {String} methodId 
@@ -234,23 +271,7 @@ export class M4ApiNode {
     };
 
     /**
-     * Logon with RXHS
-     */
-    logonObservable(): rxjs.Observable<string>{
-        const _logonObservable = rxjs.from(this.logonPromise());
-        return _logonObservable;
-    };
-
-    /**
-     * Logout with RXHS
-     */
-    logoutObservable(): rxjs.Observable<boolean>{
-        const _logoutObservable = rxjs.from(this.logoutPromise());
-        return _logoutObservable;
-    }
-
-    /**
-     * Execute method with RXHS
+     * Convert Execute Method Promise to Observable RxJS
      * @param m4objectId 
      * @param nodeId 
      * @param methodId 
@@ -261,14 +282,50 @@ export class M4ApiNode {
         return _executeMethodObservable;
     }
 
-    createM4NodeObservable(m4Node : M4Node): rxjs.Observable<any> {
+    /**
+     * Register node item changed callback as RxJS Observable
+     * @param {M4Node} m4Node 
+     */
+    createObservableByNodeItemChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
         const observable = new rxjs.Observable(subscriber => {
-            function subscriberFunc(itemValue:any){
-                subscriber.next(itemValue);
+            function subscriberFunc(eventValue:any){
+                subscriber.next(eventValue);
                 subscriber.complete();
             }
             m4Node.register(_localWindow.meta4.M4EventTypes.getItemChanged(), subscriberFunc.bind(this), null);
+          });
+        return observable
+    }
+
+    /**
+     * Register node records changed callback as RxJS Observable
+     * @param {M4Node} m4Node 
+     */
+    createObservableByNodeRecordsChanged(m4Node : M4Node): rxjs.Observable<any> {
+        const _localWindow = this.getWindow();
+        const observable = new rxjs.Observable(subscriber => {
+            function subscriberFunc(eventValue:any){
+                subscriber.next(eventValue);
+                subscriber.complete();
+            }
+            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeRecordsChanged(), subscriberFunc.bind(this), null);
+          });
+        return observable
+    }
+
+    /**
+     * Register node current changed callback as RxJS Observable
+     * @param {M4Node} m4Node 
+     */
+    createObservableByNodeCurrentChanged(m4Node : M4Node): rxjs.Observable<any> {
+        const _localWindow = this.getWindow();
+        const observable = new rxjs.Observable(subscriber => {
+            function subscriberFunc(eventValue:any){
+                subscriber.next(eventValue);
+                subscriber.complete();
+            }
+            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeCurrentChanged()(), subscriberFunc.bind(this), null);
           });
         return observable
     }
