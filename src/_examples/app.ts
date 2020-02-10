@@ -33,7 +33,7 @@ async function example(){
         const nodeRequestValue01 = nodeRequest01.getValue("PSCO_EMPLOYEE_NAME");
         console.log("Execute 01 - Method executed ok! Number of records is: " + nodeRequest01.count());
         console.log("Execute 01 - Method executed ok! Value of records is: " + nodeRequestValue01);
-        m4apiNode01.m4Store.getAllCookies((error,values) =>{
+        m4apiNode01.getCookieStore().getAllCookies((error,values) =>{
             console.log("============================ Execute 01 - Cookie Values ============================");
             console.log("Execute 01 - Cookie Values :"+ values.length);
             values.forEach((value) => {
@@ -53,7 +53,7 @@ async function example(){
         const nodeRequestValue02 = nodeRequest02.getValue("PSCO_EMPLOYEE_NAME");
         console.log("Execute 02 - Method executed ok! Number of records is: " + nodeRequest02.count());
         console.log("Execute 02 - Method executed ok! Value of records is: " + nodeRequestValue02);
-        m4apiNode02.m4Store.getAllCookies((error,values) =>{
+        m4apiNode02.getCookieStore().getAllCookies((error,values) =>{
             console.log("============================ Execute 02 - Cookie Values ============================");
             console.log("Execute 02 - Cookie Values :"+ values.length);
             values.forEach((value) => {
@@ -66,7 +66,7 @@ async function example(){
     // Observable
     console.log("============================ Observables ============================");
     const m4node = request02.getObject().getNode("PSCO_EMPLOYEE_RECORD_HEADER");
-    const m4NodeObservable = m4apiNode02.createM4NodeObservable(m4node);
+    const m4NodeObservable = m4apiNode02.createObservableByNodeItemChanged(m4node);
     const m4EmployeName = m4node.getValue("PSCO_EMPLOYEE_NAME");
     console.log('EMPLOYE NAME before subscribe '+m4EmployeName);
 
