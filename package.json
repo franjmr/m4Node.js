@@ -1,6 +1,6 @@
 {
   "name": "@franjmr/m4-node-api",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "M4NodeApi inside Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

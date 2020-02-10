@@ -315,7 +315,7 @@ export class M4ApiNode {
     async createM4ObjectAsync(m4objectId: string): Promise<M4Object>{
         await this.loadMetadataPromise([m4objectId]);
         const _localWindow = this.getWindow(); 
-        return _localWindow.meta4.M4Object(m4objectId);
+        return new _localWindow.meta4.M4Object(m4objectId);
     }
     
     /**
