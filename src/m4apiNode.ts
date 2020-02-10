@@ -257,7 +257,32 @@ export class M4ApiNode {
         return new Promise((resolve) => { 
             const _obj = new _localWindow.meta4.M4Object(m4objectId);
             const _node = _obj.getNode(nodeId);
-            const _request = new _localWindow.meta4.M4Request(_node.getObject(), _node.getId(), methodId, methodArgs);
+            const _request = new _localWindow.meta4.M4Request(_obj, _node.getId(), methodId, methodArgs);
+            _m4Executor.execute(_request,
+                (request: M4Request) => {
+                    console.log("Method executed ok!");
+                    resolve(request);
+                }, 
+                (request: M4Request) => {
+                    console.log("error: Method executed: " + request.getErrorException());;
+                    resolve();
+                }
+            );
+        }) 
+    };
+
+    /**
+     * Execute method promise-based asynchronous
+     * @param {M4Object} m4objectId 
+     * @param {String} nodeId 
+     * @param {String} methodId 
+     * @param {String} methodArgs
+     */
+    executeM4ObjectMethodPromise(m4object: M4Object, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request> { 
+        const _m4Executor = this.getM4Executor();
+        const _localWindow = this.getWindow();
+        return new Promise((resolve) => { 
+            const _request = new _localWindow.meta4.M4Request(m4object, nodeId, methodId, methodArgs);
             _m4Executor.execute(_request,
                 (request: M4Request) => {
                     console.log("Method executed ok!");
@@ -292,6 +317,7 @@ export class M4ApiNode {
         const _localWindow = this.getWindow(); 
         return _localWindow.meta4.M4Object(m4objectId);
     }
+    
     /**
      * Register node item changed callback as RxJS Observable
      * @param {M4Node} m4Node 
