@@ -89,9 +89,9 @@ export class M4ApiNode {
         return new Promise((resolve) => { 
             http.get( apiUrl, (res) => {
                 res.setEncoding('utf8');
-                res.pipe(concat({ encoding: 'string' }, (remoteSrc) => {
-                  vm.runInThisContext(remoteSrc, 'remote_modules/m4jsapi_node.js');
-                  resolve(true);
+                res.pipe(concat({ encoding: 'string' }, (remoteSrc:string) => {
+                    vm.runInThisContext(remoteSrc, 'remote_modules/m4jsapi_node.js');
+                    resolve(true);
                 }));
             });
         });
