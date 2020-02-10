@@ -361,7 +361,7 @@ export class M4ApiNode {
                 subscriber.next(eventValue);
                 subscriber.complete();
             }
-            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeCurrentChanged()(), subscriberFunc.bind(this), null);
+            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeCurrentChanged(), subscriberFunc.bind(this), null);
           });
         return observable
     }
