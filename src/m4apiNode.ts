@@ -7,6 +7,7 @@ import http = require('http');
 import vm  = require('vm');
 import concat = require('concat-stream');
 import { M4Node } from "./m4Interfaces/M4Node";
+import { M4Object } from "./m4Interfaces/M4Object";
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -282,6 +283,15 @@ export class M4ApiNode {
         return _executeMethodObservable;
     }
 
+    /**
+     * Create M4Object asynchronous
+     * @param m4objectId 
+     */
+    async createM4ObjectAsync(m4objectId: string): Promise<M4Object>{
+        await this.loadMetadataPromise([m4objectId]);
+        const _localWindow = this.getWindow(); 
+        return _localWindow.meta4.M4Object(m4objectId);
+    }
     /**
      * Register node item changed callback as RxJS Observable
      * @param {M4Node} m4Node 
