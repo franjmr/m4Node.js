@@ -11,6 +11,7 @@ import { M4Object } from "./m4Interfaces/M4Object";
 import { M4NodeCurrentChangedEvent } from "./m4Interfaces/client/events/M4NodeCurrentChangedEvent";
 import { M4NodeRecordsChangedEvent } from "./m4Interfaces/client/events/M4NodeRecordsChangedEvent";
 import { M4ItemChangedEvent } from "./m4Interfaces/client/events/M4ItemChangedEvent";
+import { M4LogonResult } from "./m4Interfaces/M4LogonResult";
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -181,7 +182,7 @@ export class M4ApiNode {
     /**
      * Logon User promise-based asynchronous
      */
-    logonPromise(): Promise<string>{
+    logonPromise(): Promise<M4LogonResult>{
         const _m4Executor = this.getM4Executor();
         const _user = this.user;
         const _pass = this.pass;
@@ -190,12 +191,12 @@ export class M4ApiNode {
             _m4Executor.logon(_user, _pass, "2", 
                 (request: M4Request) => {
                     if (!request.getResult()) {
-                        console.log("Logon didn't work");
+                        console.log("Logon error!");
                         reject();
                     }else {
-                        const logonToken = request.getResult().getToken();
-                        console.log("Logon Success! Token = " + logonToken);
-                        resolve(logonToken);
+                        console.log("Logon Success!");
+                        const loginResult = request.getResult();
+                        resolve(loginResult);
                     }
                 }, 
                 (request: M4Request) => {

@@ -18,11 +18,11 @@ async function example(){
     await m4apiNode02.initializeAsync();
 
     // Logon Instances
-    const logonToken01 = await m4apiNode01.logonPromise();
-    const logonToken02 = await m4apiNode02.logonPromise();
+    const logonResult01 = await m4apiNode01.logonPromise();
+    const logonResult02 = await m4apiNode02.logonPromise();
 
-    console.log("User 01 token: "+logonToken01);
-    console.log("User 01 token: "+logonToken02);
+    console.log("User 01 token: "+logonResult01.getToken());
+    console.log("User 02 token: "+logonResult02.getToken());
 
     // Execute Instance 01
     await m4apiNode01.loadMetadataPromise(['PLCO_LOAD_ALL_PERSONAL_INFO']);
