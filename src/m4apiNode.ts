@@ -8,7 +8,9 @@ import vm  = require('vm');
 import concat = require('concat-stream');
 import { M4Node } from "./m4Interfaces/M4Node";
 import { M4Object } from "./m4Interfaces/M4Object";
-import { M4Event } from "./m4Interfaces/M4Event";
+import { M4NodeCurrentChangedEvent } from "./m4Interfaces/client/events/M4NodeCurrentChangedEvent";
+import { M4NodeRecordsChangedEvent } from "./m4Interfaces/client/events/M4NodeRecordsChangedEvent";
+import { M4ItemChangedEvent } from "./m4Interfaces/client/events/M4ItemChangedEvent";
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -326,11 +328,11 @@ export class M4ApiNode {
     createObservableByNodeItemChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
         const observable = new rxjs.Observable(subscriber => {
-            function subscriberFunc(eventValue:M4Event){
+            function subscriberFunction(eventValue:M4ItemChangedEvent){
                 subscriber.next(eventValue);
                 subscriber.complete();
             }
-            m4Node.register(_localWindow.meta4.M4EventTypes.getItemChanged(), subscriberFunc.bind(this), null);
+            m4Node.register(_localWindow.meta4.M4EventTypes.getItemChanged(), subscriberFunction.bind(this), null);
           });
         return observable;
     }
@@ -342,11 +344,11 @@ export class M4ApiNode {
     createObservableByNodeRecordsChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
         const observable = new rxjs.Observable(subscriber => {
-            function subscriberFunc(eventValue:M4Event){
+            function subscriberFunction(eventValue:M4NodeRecordsChangedEvent){
                 subscriber.next(eventValue);
                 subscriber.complete();
             }
-            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeRecordsChanged(), subscriberFunc.bind(this), null);
+            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeRecordsChanged(), subscriberFunction.bind(this), null);
           });
         return observable;
     }
@@ -358,11 +360,11 @@ export class M4ApiNode {
     createObservableByNodeCurrentChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
         const observable = new rxjs.Observable(subscriber => {
-            function subscriberFunc(eventValue:M4Event){
+            function subscriberFunction(eventValue:M4NodeCurrentChangedEvent){
                 subscriber.next(eventValue);
                 subscriber.complete();
             }
-            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeCurrentChanged(), subscriberFunc.bind(this), null);
+            m4Node.register(_localWindow.meta4.M4EventTypes.getNodeCurrentChanged(), subscriberFunction.bind(this), null);
           });
         return observable;
     }
