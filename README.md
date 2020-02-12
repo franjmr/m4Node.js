@@ -1,8 +1,8 @@
 # M4Node.js
-M4Node.js inside Node.js
+M4JSAPI inside Node.js
 
 ## About
-M4Node.js abstracts the M4JSAPI library and provides a builder and api of it per session.
+M4Node.js abstracts the M4JSAPI library and provides a instances builder with an api of it per user session.
 
 The prototype is implemented in typescript and offers the possibility of interacting with the M4JSAPI library with [promises](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous) (async / await) and [observables](https://rxjs-dev.firebaseapp.com/guide/observable) (Rxjs)
 

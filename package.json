@@ -1,7 +1,7 @@
 {
   "name": "@franjmr/m4-node-api",
-  "version": "1.0.21",
-  "description": "M4NodeApi inside Node.js",
+  "version": "1.0.22",
+  "description": "M4JSAPI inside Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
