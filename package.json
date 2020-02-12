@@ -1,6 +1,6 @@
 {
   "name": "@franjmr/m4-node-api",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "description": "M4JSAPI inside Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/franjmr/api_callback2promise2rxjs.git"
+    "url": "https://github.com/franjmr/m4Node.js.git"
   },
   "keywords": [
     "m4-node-api"
