@@ -18,15 +18,15 @@ async function example(){
     await m4apiNode02.initializeAsync();
 
     // Logon Instances
-    const logonResult01 = await m4apiNode01.logonPromise();
-    const logonResult02 = await m4apiNode02.logonPromise();
+    const logonResult01 = await m4apiNode01.logon();
+    const logonResult02 = await m4apiNode02.logon();
 
     console.log("User 01 token: "+logonResult01.getToken());
     console.log("User 02 token: "+logonResult02.getToken());
 
     // Execute Instance 01
-    await m4apiNode01.loadMetadataPromise(['PLCO_LOAD_ALL_PERSONAL_INFO']);
-    const request01 = await m4apiNode01.executeMethodPromise("PLCO_LOAD_ALL_PERSONAL_INFO", "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
+    await m4apiNode01.loadMetadata(['PLCO_LOAD_ALL_PERSONAL_INFO']);
+    const request01 = await m4apiNode01.executeMethod("PLCO_LOAD_ALL_PERSONAL_INFO", "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
     const objRequest01 = request01.getObject();
     if( objRequest01 ){
         const nodeRequest01 = objRequest01.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
@@ -45,8 +45,8 @@ async function example(){
     
 
     // Execute Instance 02
-    await m4apiNode02.loadMetadataPromise(['PLCO_LOAD_ALL_PERSONAL_INFO']);
-    const request02 = await m4apiNode02.executeMethodPromise("PLCO_LOAD_ALL_PERSONAL_INFO", "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
+    await m4apiNode02.loadMetadata(['PLCO_LOAD_ALL_PERSONAL_INFO']);
+    const request02 = await m4apiNode02.executeMethod("PLCO_LOAD_ALL_PERSONAL_INFO", "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
     const objRequest02 = request02.getObject();
     if( objRequest02 ){
         const nodeRequest02 = objRequest02.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
@@ -82,8 +82,8 @@ async function example(){
     // END EXAMPLES
 
     // Logout instances
-    await m4apiNode01.logoutPromise();
-    await m4apiNode02.logoutPromise();
+    await m4apiNode01.logout();
+    await m4apiNode02.logout();
 
     console.log("All done!")
 }
