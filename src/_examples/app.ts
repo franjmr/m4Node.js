@@ -17,6 +17,9 @@ async function example(){
     await m4apiNode01.initializeAsync();
     await m4apiNode02.initializeAsync();
 
+    // Enable console message
+    m4apiNode01.enableConsoleMessages();
+
     // Logon Instances
     const logonResult01 = await m4apiNode01.logon();
     const logonResult02 = await m4apiNode02.logon();

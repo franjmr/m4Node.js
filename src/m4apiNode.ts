@@ -75,17 +75,13 @@ export class M4ApiNode {
         return this.m4Store;
     }
 
-    showConsoleMessages():void {
+    enableConsoleMessages():void {
         this.showConsoleMsg = true;
     }
 
-    /**
-     * Writes a message to the console
-     * @param {String} message 
-     */
-    private printConsoleMessage(message:string){
+    private consoleMessage(message:string):void{
         if(this.showConsoleMsg){
-            this.printConsoleMessage(message);
+            console.log("[M4Node.js] - "+message);
         }
     }
 
@@ -105,7 +101,7 @@ export class M4ApiNode {
      * Import M4JSAPI from apiUrl property
      */
     private importM4Jsapi(): Promise<boolean>{
-        this.printConsoleMessage("Loading M4JSAPI from url: "+this.apiUrl);
+        this.consoleMessage("Loading M4JSAPI from url: "+this.apiUrl);
         const apiUrl = this.apiUrl;
         return new Promise((resolve) => { 
             http.get( apiUrl, (res) => {
@@ -133,7 +129,6 @@ export class M4ApiNode {
     private isM4JsapiLoaded(): Promise<boolean> {
         return new Promise((resolve) => { 
             window.meta4OnLoad = function meta4OnLoad() {
-                this.printConsoleMessage("M4JSAPI loaded!");
                 resolve(true);
             }
         });
@@ -170,7 +165,6 @@ export class M4ApiNode {
 
         this.m4Window = window;
 
-        this.printConsoleMessage("M4JSAPI Initial Load!");
         global.window = this.m4Window;
         global.document = this.m4Window.document;
         global.navigator = this.m4Window.navigator;
@@ -189,22 +183,17 @@ export class M4ApiNode {
         const _m4Executor = this.getM4Executor();
         const _user = this.user;
         const _pass = this.pass;
+        this.consoleMessage("User Logon '"+_user+"'");
         return new Promise((resolve, reject) => { 
-            this.printConsoleMessage("Doing logon with user: "+_user+"...");
             _m4Executor.logon(_user, _pass, "2", 
                 (request: M4Request) => {
                     if (!request.getResult()) {
-                        this.printConsoleMessage("Logon error!");
                         reject();
                     }else {
-                        this.printConsoleMessage("Logon Success!");
-                        const loginResult = request.getResult();
-                        resolve(loginResult);
+                        resolve(request.getResult());
                     }
                 }, 
                 (request: M4Request) => {
-                    this.printConsoleMessage("Error - logon: " + request.getErrorException());
-                    this.printConsoleMessage("Error message logon: "+ request.getErrorMessage());
                     reject(request.getErrorException());
                 }
             );
@@ -216,15 +205,13 @@ export class M4ApiNode {
      */
     logout(): Promise<boolean>{
         const _m4Executor = this.getM4Executor();
+        this.consoleMessage("User logout '"+this.user+"'");
         return new Promise((resolve) => { 
-            this.printConsoleMessage("Executing logout...");
             _m4Executor.logout(
                 () => {
-                    this.printConsoleMessage("Logout done ok!");
                     resolve(true);
                 }, 
                 (request: M4Request) => {
-                    this.printConsoleMessage("Error logout: " + request.getErrorException());
                     resolve(false);
                 }
             );
@@ -235,18 +222,16 @@ export class M4ApiNode {
      * Load Metadata promise-based asynchronous
      * @param {Array} m4objects 
      */
-    loadMetadata(m4objects: string[]): Promise<boolean> { 
-        this.printConsoleMessage("Loading M4Object metadata from "+m4objects.toString());
+    loadMetadata(m4objects: string[]): Promise<M4Request> { 
+        this.consoleMessage("Loading the metadata objects: "+m4objects.toString());
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve,reject) => { 
             _m4Executor.loadMetadata(m4objects, 
-                () => {
-                    this.printConsoleMessage("Metadata loaded ok!");
-                    resolve(true);
+                (request: M4Request) => {
+                    resolve(request);
                 }, 
                 (request: M4Request) => {
-                    this.printConsoleMessage("Error loading metadata: " + request.getErrorException());
-                    reject(false);
+                    reject(request);
                 }
             );
         }) 
@@ -262,20 +247,16 @@ export class M4ApiNode {
     executeMethod(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request> { 
         const _m4Executor = this.getM4Executor();
         const _localWindow = this.getWindow();
-        return new Promise((resolve) => { 
+        this.consoleMessage("Execute method - Detail > M4O: '"+m4objectId+"' > Node: '"+nodeId+"' > Method: '"+methodId+"'");
+        return new Promise((resolve,reject) => { 
             const _obj: M4Object = new _localWindow.meta4.M4Object(m4objectId);
-            const _node: M4Node = _obj.getNode(nodeId);
-            const _request: M4Request = new _localWindow.meta4.M4Request(_obj, _node.getId(), methodId, methodArgs);
-            this.printConsoleMessage("Execute method detail > M4O: "+m4objectId+" > Node: "+nodeId+" > Method: "+methodId);
-            this.printConsoleMessage("Executing method...");
+            const _request: M4Request = new _localWindow.meta4.M4Request(_obj, nodeId, methodId, methodArgs);
             _m4Executor.execute(_request,
                 (request: M4Request) => {
-                    this.printConsoleMessage("Method executed ok!");
                     resolve(request);
                 }, 
                 (request: M4Request) => {
-                    this.printConsoleMessage("Method executed with errors. Error Exception: " + request.getErrorException());;
-                    resolve();
+                    reject(request);
                 }
             );
         }) 
@@ -304,17 +285,15 @@ export class M4ApiNode {
     executeM4ObjectMethod(m4object: M4Object, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request> { 
         const _m4Executor = this.getM4Executor();
         const _localWindow = this.getWindow();
-        return new Promise((resolve) => { 
-            this.printConsoleMessage("Execute method detail > M4O: "+m4object.getId()+" > Node: "+nodeId+" > Method: "+methodId);
+        this.consoleMessage("Execute M4Object method - Detail > M4O: '"+m4object.getId()+"' > Node: '"+nodeId+"' > Method: '"+methodId+"'");
+        return new Promise((resolve,reject) => { 
             const _request: M4Request = new _localWindow.meta4.M4Request(m4object, nodeId, methodId, methodArgs);
             _m4Executor.execute(_request,
                 (request: M4Request) => {
-                    this.printConsoleMessage("Method executed ok!");
                     resolve(request);
                 }, 
                 (request: M4Request) => {
-                    this.printConsoleMessage("Method executed with errors. Error Exception: " + request.getErrorException());;
-                    resolve();
+                    reject(request);
                 }
             );
         }) 
@@ -326,16 +305,14 @@ export class M4ApiNode {
      */
     executeM4Request(m4Request: M4Request): Promise<M4Request> { 
         const _m4Executor = this.getM4Executor();
-        return new Promise((resolve) => { 
-            this.printConsoleMessage("Execute request detail > M4O: "+m4Request.getObjectId()+" > Node: "+m4Request.getNodeId()+" > Method: "+m4Request.getMethodId());
+        this.consoleMessage("Execute M4Request - Detail > M4O: '"+m4Request.getObjectId()+"' > Node: '"+m4Request.getNodeId()+"' > Method: '"+m4Request.getMethodId()+"'");
+        return new Promise((resolve,reject) => { 
             _m4Executor.execute(m4Request,
                 (request: M4Request) => {
-                    this.printConsoleMessage("Method executed ok!");
                     resolve(request);
                 }, 
                 (request: M4Request) => {
-                    this.printConsoleMessage("Method executed with errors. Error Exception: " + request.getErrorException());;
-                    resolve();
+                    reject(request);
                 }
             );
         }) 
