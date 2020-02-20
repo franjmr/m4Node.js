@@ -1,5 +1,7 @@
 export interface M4Node {
   addRecord(): void;
+  getId(): string;
+  getNodeValues(): any[];
   count(): number;
   getCurrent(): number;
   getValue(itemId: string): any;
@@ -11,5 +13,5 @@ export interface M4Node {
   moveToEOF(): any;
   setToDelete(): any;
   setValue(itemId: string, value: any): any;
-  register(eventType : any,callback: any, context: any): boolean
+  register(eventType: any, callback: any, context: any): boolean;
 }
