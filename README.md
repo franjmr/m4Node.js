@@ -62,7 +62,6 @@ describe("M4JSAPI - Logon suite", () => {
     });
 });
 ```
-
 ## Api Reference
 - <b>createM4Object(m4objectId: string): Promise<M4Object>;</b> Load M4Object metadata and create object instance asynchronous
 - <b>createM4Request(m4object: M4Object, nodeId: string, methodId: string, methodArgs: any[]): M4Request;</b> Create M4Request instance
@@ -78,9 +77,17 @@ describe("M4JSAPI - Logon suite", () => {
 - <b>logon(): Promise<M4LogonResult>;</b> Logon User promise-based asynchronous
 - <b>logout(): Promise<boolean>;</b> Logout User promise-based asynchronous
 
+## Api Reference (Debugging)
+- <b>enableConsoleMessages(): void;</b> Enable Console messages
+- <b>disableConsoleMessages(): void;</b> Disable Console messages
+- <b>getApiUrl(): string;</b> Returns Api URL (M4JSAPI Node URL)
+- <b>getCookieStore(): tough.MemoryCookieStore;</b> Returns Cookie Storage (https://www.npmjs.com/package/tough-cookie)
+- <b>getUser(): string;</b> Returns User property value setted in constructor
+- <b>getServer(): string;</b> Returns Server property value setted in constructor
 
 ## Documentation
 - [JSDom](https://github.com/jsdom/jsdom)
 - [TypeScript](https://www.typescriptlang.org)
 - [Rxjs](https://rxjs-dev.firebaseapp.com/)
 - [Async/Await](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous)
+- [Jasmine](https://jasmine.github.io/)
