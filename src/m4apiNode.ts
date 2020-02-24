@@ -56,7 +56,7 @@ export class M4ApiNode {
       this.apiUrl = server + baseFile;
       this.m4Store = new tough.MemoryCookieStore();
       this.m4CookieStore = new tough.CookieJar(this.m4Store);
-      this.showConsoleMsg = false
+      this.showConsoleMsg = false;
     }
 
     /**
