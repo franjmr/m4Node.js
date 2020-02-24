@@ -59,26 +59,52 @@ export class M4ApiNode {
       this.showConsoleMsg = false
     }
 
+    /**
+     * Returns User property value setted in constructor
+     */
     getUser(): string {
         return this.user;
     }
 
+    /**
+     * Returns Server property value setted in constructor
+     */
     getServer(): string {
         return this.server;
     }
 
+    /**
+     * Returns Api URL (M4JSAPI Node URL)
+     */
     getApiUrl(): string {
         return this.apiUrl;
     }
 
+    /**
+     * Returns Cookie Storage (https://www.npmjs.com/package/tough-cookie)
+     */
     getCookieStore(): tough.MemoryCookieStore{
         return this.m4Store;
     }
 
+    /**
+     * Enable Console messages
+     */
     enableConsoleMessages():void {
         this.showConsoleMsg = true;
     }
 
+    /**
+     * Disable Console messages
+     */
+    disableConsoleMessages():void{
+        this.showConsoleMsg = false;
+    }
+
+    /**
+     * Print menssage in the console
+     * @param {String} message 
+     */
     private consoleMessage(message:string):void{
         if(this.showConsoleMsg){
             console.log("[M4Node.js] - "+message);
