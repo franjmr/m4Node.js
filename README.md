@@ -49,10 +49,7 @@ describe("M4JSAPI - Logon suite", () => {
     let m4ApiNodejs: M4ApiNode ;
     
     beforeAll(async ()=>{
-        const server = "http://arya.meta4.com:5020";
-        const user = "ORLIEMOBILE";
-        const pass = "RUN";
-        m4ApiNodejs = await M4ApiNodejs(server,user,pass);
+        m4ApiNodejs = await M4ApiNodejs('http://myserver.domain.com:9999','userHere','passHere');
     });
 
     afterAll(async() => {
