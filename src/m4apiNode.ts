@@ -60,49 +60,49 @@ export class M4ApiNode {
     }
 
     /**
-     * Returns User property value setted in constructor
+     * Returns User property value setted in constructor.
      */
     getUser(): string {
         return this.user;
     }
 
     /**
-     * Returns Server property value setted in constructor
+     * Returns Server property value setted in constructor.
      */
     getServer(): string {
         return this.server;
     }
 
     /**
-     * Returns Api URL (M4JSAPI Node URL)
+     * Returns Api URL. (M4JSAPI Node URL)
      */
     getApiUrl(): string {
         return this.apiUrl;
     }
 
     /**
-     * Returns Cookie Storage (https://www.npmjs.com/package/tough-cookie)
+     * Returns Cookie Storage. (https://www.npmjs.com/package/tough-cookie)
      */
     getCookieStore(): tough.MemoryCookieStore{
         return this.m4Store;
     }
 
     /**
-     * Enable Console messages
+     * Enable Console messages.
      */
     enableConsoleMessages():void {
         this.showConsoleMsg = true;
     }
 
     /**
-     * Disable Console messages
+     * Disable Console messages.
      */
     disableConsoleMessages():void{
         this.showConsoleMsg = false;
     }
 
     /**
-     * Print menssage in the console
+     * Print menssage in the console.
      * @param {String} message 
      */
     private consoleMessage(message:string):void{
@@ -112,7 +112,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Get M4Executor
+     * Get M4Executor.
      * @returns {M4Executor} m4Executor
      */
     private getM4Executor(): M4Executor{
@@ -124,7 +124,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Import M4JSAPI from apiUrl property
+     * Import M4JSAPI from apiUrl property.
      */
     private importM4Jsapi(): Promise<boolean>{
         this.consoleMessage("Loading M4JSAPI from url: "+this.apiUrl);
@@ -141,7 +141,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Set M4Executor
+     * Set M4Executor.
      * @param {com.meta4.js.client.M4Executor} m4Executor
      */
     private setM4Executor(m4Executor: M4Executor){
@@ -149,7 +149,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Resolve M4JSAPI is loaded in context
+     * Resolves when M4JSAPI library is loaded.
      * @returns {Promise}
      */
     private isM4JsapiLoaded(): Promise<boolean> {
@@ -161,14 +161,14 @@ export class M4ApiNode {
     }
 
     /**
-     * Return jsdom.DOMWindow from instance
+     * Return jsdom.DOMWindow from instance.
      */
     private getWindow() : jsdom.DOMWindow{
         return this.m4Window;
     }
 
     /**
-     * Create M4Executor instance
+     * Create M4Executor instance.
      */
     private createM4Executor(): void{
         const localWindow = this.getWindow();
@@ -177,7 +177,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Initialize M4jsapi instance as jsdom.DOMWindow
+     * Initialize M4jsapi instance as jsdom.DOMWindow.
      */
     async initializeAsync(): Promise<boolean>{
         const { window } = new JSDOM(``, {
@@ -203,7 +203,7 @@ export class M4ApiNode {
     }
 
     /**
-     * Logon User promise-based asynchronous
+     * Logon User promise-based asynchronous.
      */
     logon(): Promise<M4LogonResult>{
         const _m4Executor = this.getM4Executor();
@@ -214,45 +214,45 @@ export class M4ApiNode {
             _m4Executor.logon(_user, _pass, "2", 
                 (request: M4Request) => {
                     if (!request.getResult()) {
-                        reject();
+                        reject(request);
                     }else {
                         resolve(request.getResult());
                     }
                 }, 
                 (request: M4Request) => {
-                    reject(request.getErrorException());
+                    reject(request);
                 }
             );
         });
     }
 
     /**
-     * Logout User promise-based asynchronous
+     * Logout User promise-based asynchronous.
      */
-    logout(): Promise<boolean>{
+    logout(): Promise<M4Request>{
         const _m4Executor = this.getM4Executor();
         this.consoleMessage("User logout '"+this.user+"'");
         return new Promise((resolve) => { 
             _m4Executor.logout(
-                () => {
-                    resolve(true);
+                (request) => {
+                    resolve(request);
                 }, 
                 (request: M4Request) => {
-                    resolve(false);
+                    resolve(request);
                 }
             );
         });
     }
 
     /**
-     * Load Metadata promise-based asynchronous
-     * @param {Array} m4objects 
+     * Load Metadata promise-based asynchronous.
+     * @param {Array} m4ObjectIds M4Object Ids to load metadata.
      */
-    loadMetadata(m4objects: string[]): Promise<M4Request> { 
-        this.consoleMessage("Loading the metadata objects: "+m4objects.toString());
+    loadMetadata(m4ObjectIds: string[]): Promise<M4Request> { 
+        this.consoleMessage("Loading the metadata objects: "+m4ObjectIds.toString());
         const _m4Executor = this.getM4Executor();
         return new Promise((resolve,reject) => { 
-            _m4Executor.loadMetadata(m4objects, 
+            _m4Executor.loadMetadata(m4ObjectIds, 
                 (request: M4Request) => {
                     resolve(request);
                 }, 
@@ -264,49 +264,25 @@ export class M4ApiNode {
     };
 
     /**
-     * Execute method promise-based asynchronous
-     * @param {String} m4objectId 
-     * @param {String} nodeId 
-     * @param {String} methodId 
-     * @param {String} methodArgs 
+     * Execute method promise-based asynchronous. [Implicitly load metadata]
+     * @param {String} m4objectId M4Object ID
+     * @param {String} nodeId Node ID
+     * @param {String} methodId Method ID
+     * @param {Array} methodArgs Method arguments
      */
-    executeMethod(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request> { 
-        const _m4Executor = this.getM4Executor();
-        const _localWindow = this.getWindow();
+    async executeMethod(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request> { 
         this.consoleMessage("Execute method - Detail > M4O: '"+m4objectId+"' > Node: '"+nodeId+"' > Method: '"+methodId+"'");
-        return new Promise((resolve,reject) => { 
-            const _obj: M4Object = new _localWindow.meta4.M4Object(m4objectId);
-            const _request: M4Request = new _localWindow.meta4.M4Request(_obj, nodeId, methodId, methodArgs);
-            _m4Executor.execute(_request,
-                (request: M4Request) => {
-                    resolve(request);
-                }, 
-                (request: M4Request) => {
-                    reject(request);
-                }
-            );
-        }) 
+        const m4object = await this.createM4Object(m4objectId);
+        const executeMethod = await this.executeM4ObjectMethod(m4object,nodeId, methodId, methodArgs);
+        return executeMethod;
     };
 
     /**
-     * Load M4Object Metadata and execute method promise-based asynchronous
-     * @param m4objectId 
-     * @param nodeId 
-     * @param methodId 
-     * @param methodArgs 
-     */
-    async executeMethodExtend(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request>{
-        await this.loadMetadata([m4objectId]);
-        const executeMethodPromise = await this.executeMethod(m4objectId,nodeId,methodId, methodArgs);
-        return executeMethodPromise;
-    }
-
-    /**
-     * Execute method promise-based asynchronous
-     * @param {M4Object} m4objectId 
-     * @param {String} nodeId 
-     * @param {String} methodId 
-     * @param {Array} methodArgs
+     * Execute method promise-based asynchronous.
+     * @param {String} m4objectId M4Object ID
+     * @param {String} nodeId Node ID
+     * @param {String} methodId Method ID
+     * @param {Array} methodArgs Method arguments
      */
     executeM4ObjectMethod(m4object: M4Object, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request> { 
         const _m4Executor = this.getM4Executor();
@@ -326,7 +302,7 @@ export class M4ApiNode {
     };
 
     /**
-     * Execute MRequest instance
+     * Execute MRequest instance.
      * @param {M4Request} m4Request
      */
     executeM4Request(m4Request: M4Request): Promise<M4Request> { 
@@ -345,11 +321,11 @@ export class M4ApiNode {
     };
 
     /**
-     * Create M4Request instance
-     * @param {M4Object} m4objectId 
-     * @param {String} nodeId 
-     * @param {String} methodId 
-     * @param {Array} methodArgs
+     * Execute method promise-based asynchronous.
+     * @param {M4Object} m4object M4Object instance
+     * @param {String} nodeId Node ID
+     * @param {String} methodId Method ID
+     * @param {Array} methodArgs Method arguments
      */
     createM4Request(m4object: M4Object, nodeId: string, methodId: string, methodArgs: any[]): M4Request { 
         const _localWindow = this.getWindow();
@@ -358,11 +334,11 @@ export class M4ApiNode {
     };
     
     /**
-     * Convert Execute Method Promise to Observable RxJS
-     * @param {String} m4objectId 
-     * @param {String} nodeId 
-     * @param {String} methodId 
-     * @param {Array} methodArgs
+     * Convert execute method Promise to Observable RxJS. [Implicitly load metadata]
+     * @param {String} m4objectId M4Object ID
+     * @param {String} nodeId Node ID
+     * @param {String} methodId Method ID
+     * @param {Array} methodArgs Method arguments
      */
     executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>{
         const _executeMethodObservable = rxjs.from(this.executeMethod(m4objectId, nodeId, methodId, methodArgs));
@@ -370,8 +346,8 @@ export class M4ApiNode {
     }
 
     /**
-     * Load M4Object metadata and create object instance asynchronous
-     * @param {String} m4objectId 
+     * Create object instance asynchronous. [Implicitly load metadata]
+     * @param {String} m4objectId M4Object ID
      */
     async createM4Object(m4objectId: string): Promise<M4Object>{
         await this.loadMetadata([m4objectId]);
@@ -380,8 +356,8 @@ export class M4ApiNode {
     }
 
     /**
-     * Register node item changed callback as RxJS Observable
-     * @param {M4Node} m4Node 
+     * Register node item changed callback as RxJS Observable.
+     * @param {M4Node} m4Node M4Node
      */
     createObservableByNodeItemChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
@@ -396,8 +372,8 @@ export class M4ApiNode {
     }
 
     /**
-     * Register node records changed callback as RxJS Observable
-     * @param {M4Node} m4Node 
+     * Register node records changed callback as RxJS Observable.
+     * @param {M4Node} m4Node M4Node
      */
     createObservableByNodeRecordsChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
@@ -412,8 +388,8 @@ export class M4ApiNode {
     }
 
     /**
-     * Register node current changed callback as RxJS Observable
-     * @param {M4Node} m4Node 
+     * Register node current changed callback as RxJS Observable.
+     * @param {M4Node} m4Node M4Node
      */
     createObservableByNodeCurrentChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
