@@ -101,6 +101,25 @@ export class M4ApiNode {
         this.showConsoleMsg = false;
     }
 
+
+    __getWindowObject__():any{
+        return this.m4Window;
+    }
+
+    __importJsFileFromUrl__(url:string): Promise<boolean>{
+        this.consoleMessage("Loading Javascript file from url: "+url);
+        return new Promise((resolve) => { 
+            http.get( url, (res) => {
+                res.setEncoding('utf8');
+                res.pipe(concat({ encoding: 'string' }, (remoteSrc:string) => {
+                    const randomNameFile = Math.random().toString(36).substring(7);
+                    vm.runInThisContext(remoteSrc, 'remote_modules/'+randomNameFile+".js");
+                    resolve(true);
+                }));
+            });
+        });
+    }
+
     /**
      * Print menssage in the console.
      * @param {String} message 
