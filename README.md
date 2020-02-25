@@ -63,19 +63,18 @@ describe("M4JSAPI - Logon suite", () => {
 });
 ```
 ## Api Reference
-- <b>createM4Object(m4objectId: string): Promise<M4Object>;</b> Load M4Object metadata and create object instance asynchronous
+- <b>createM4Object(m4objectId: string): Promise<M4Object>;</b> Create object instance asynchronous. [Implicitly load metadata]
 - <b>createM4Request(m4object: M4Object, nodeId: string, methodId: string, methodArgs: any[]): M4Request;</b> Create M4Request instance
 - <b>createObservableByNodeCurrentChanged(m4Node: M4Node): rxjs.Observable<any>;</b> Register node current changed callback as RxJS Observable
 - <b>createObservableByNodeItemChanged(m4Node: M4Node): rxjs.Observable<any>;</b> Register node item changed callback as RxJS Observable
 - <b>createObservableByNodeRecordsChanged(m4Node: M4Node): rxjs.Observable<any>;</b> Register node records changed callback as RxJS Observable
 - <b>executeM4ObjectMethod(m4object: M4Object, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request>;</b> Execute method promise-based asynchronous
 - <b>executeM4Request(m4Request: M4Request): Promise<M4Request>;</b> Execute MRequest instance
-- <b>executeMethod(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request>;</b> Execute method promise-based asynchronous
-- <b>executeMethodExtend(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request>;</b> Load M4Object Metadata and execute method promise-based asynchronous
-- <b>executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>;</b> Convert Execute Method Promise to Observable RxJS
+- <b>executeMethod(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): Promise<M4Request>;</b> Execute method promise-based asynchronous. [Implicitly load metadata]
+- <b>executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>;</b> Convert execute method Promise to Observable RxJS. [Implicitly load metadata]
 - <b>loadMetadata(m4objects: string[]): Promise<M4Request>;</b> Load Metadata promise-based asynchronous
 - <b>logon(): Promise<M4LogonResult>;</b> Logon User promise-based asynchronous
-- <b>logout(): Promise<boolean>;</b> Logout User promise-based asynchronous
+- <b>logout(): Promise<M4Request>;</b> Logout User promise-based asynchronous
 
 ## Api Reference (Debugging)
 - <b>enableConsoleMessages(): void;</b> Enable Console messages
