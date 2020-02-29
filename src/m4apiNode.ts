@@ -12,6 +12,8 @@ import { M4NodeCurrentChangedEvent } from "./m4Interfaces/client/events/M4NodeCu
 import { M4NodeRecordsChangedEvent } from "./m4Interfaces/client/events/M4NodeRecordsChangedEvent";
 import { M4ItemChangedEvent } from "./m4Interfaces/client/events/M4ItemChangedEvent";
 import { M4LogonResult } from "./m4Interfaces/M4LogonResult";
+import { MockXhr } from "mock-xmlhttprequest/types";
+import * as MockXMLHttpRequest from "mock-xmlhttprequest";
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -42,6 +44,8 @@ export class M4ApiNode {
     private m4Store: tough.MemoryCookieStore;
     private m4CookieStore: tough.CookieJar;
     private showConsoleMsg: boolean;
+    private mapMockM4ObjectMetadata: Map<string,string>;
+    private mapMockM4Request: Map<string,M4Request>;
 
     /**
      * Constructor
@@ -57,6 +61,8 @@ export class M4ApiNode {
       this.m4Store = new tough.MemoryCookieStore();
       this.m4CookieStore = new tough.CookieJar(this.m4Store);
       this.showConsoleMsg = false;
+      this.mapMockM4ObjectMetadata = new Map();
+      this.mapMockM4Request = new Map();
     }
 
     /**
@@ -101,11 +107,6 @@ export class M4ApiNode {
         this.showConsoleMsg = false;
     }
 
-
-    __getWindowObject__():any{
-        return this.m4Window;
-    }
-
     __importJsFileFromUrl__(url:string): Promise<boolean>{
         this.consoleMessage("Loading Javascript file from url: "+url);
         return new Promise((resolve) => { 
@@ -118,6 +119,33 @@ export class M4ApiNode {
                 }));
             });
         });
+    }
+
+    __mock__initialize__(): void{
+        const _metadataValues = this.mapMockM4ObjectMetadata;
+        const MockXhr = MockXMLHttpRequest.newMockXhr();
+
+        MockXhr.onSend = (xhr : MockXhr) => {
+            //Aqui evaluar el contenido de la petición URL y recpger el valor del mapa en función del metadato.
+            const responseHeaders = { 'Content-Type': 'text/xml' };
+            const responseData = _metadataValues.get("idm4obecjt");
+            xhr.respond(200, responseHeaders, responseData);
+        };
+    
+        this.m4Window.XMLHttpRequest = MockXhr;
+    }
+
+    __mock_reset__(){
+        this.mapMockM4ObjectMetadata.clear();
+        this.mapMockM4Request.clear();
+    }
+
+    __mock__loadMetada__(m4objectId: string, m4Metadata : string): void{
+        this.mapMockM4ObjectMetadata.set(m4objectId, m4Metadata);
+    }
+
+    __mock__request__(requestId: string, m4Request: M4Request): void{
+        this.mapMockM4Request.set(requestId, m4Request);
     }
 
     /**
