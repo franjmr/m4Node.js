@@ -16,8 +16,11 @@ async function exampleMock(){
 
     // Create M4Object with mock metadata
     const m4ObjectMock = await m4apiNode.createM4Object("PLCO_LOAD_ALL_PERSONAL_INFO");
-
     console.log("Mocked M4Object: "+m4ObjectMock.getId());
+
+    //Requet
+    const request01 = await m4apiNode.executeM4ObjectMethod(m4ObjectMock, "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
+
     console.log("All done!");
 }
 

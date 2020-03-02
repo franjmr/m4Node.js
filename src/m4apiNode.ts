@@ -123,45 +123,52 @@ export class M4ApiNode {
     __mock__initialize__(): void {
         const _metadataValues = this.mapMockM4ObjectMetadata;
         const _mockXhr = MockXMLHttpRequest.newMockXhr();
-        const _urlLoadMetadata = this.server + "/servlet/M4JSServices/metadata/";
+
         _mockXhr.onSend = (xhr : any) => {
             let _responseStatus = 0;
             let _responseHeaders = null
             let _responseData = null;
-            if(xhr.url && xhr.url.startsWith(_urlLoadMetadata)){
-                const _xhrUrl :string = xhr.url;
-                const _urlLoadMetadataV = _urlLoadMetadata +"v/";
-                const _urlLoadMetadataMd = _urlLoadMetadata +"md/";
 
-                if(_xhrUrl.startsWith(_urlLoadMetadataV)){
+            try{
+                const _urlLoadMetadata = this.server + "/servlet/M4JSServices/metadata/";
+
+                if(!xhr.url || typeof xhr.url !== 'string'){
+                    throw new Error("[M4Node.js] - Invalid URL in reponse");
+                } 
+                
+                if(!xhr.url.startsWith(_urlLoadMetadata)){
+                    throw new Error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
+                }
+                
+                const _xhrUrl :string = xhr.url;
+                const _urlLoadMetadataV =  "v/";
+                const _urlLoadMetadataMd =  "md/";
+
+                if(_xhrUrl.includes(_urlLoadMetadataV)){
                     _responseStatus = 200;
                     _responseHeaders = { 'Content-Type': 'text/plain' };
                     _responseData = "";
-                }else if(_xhrUrl.startsWith(_urlLoadMetadataMd)){
-                    const idM4Object = _xhrUrl.substring(_xhrUrl.lastIndexOf("md/") + 3 ,_xhrUrl.length);
+                }else if(_xhrUrl.includes(_urlLoadMetadataMd)){
+                    const idM4Object = _xhrUrl.substring((_xhrUrl.lastIndexOf(_urlLoadMetadataMd)+3),_xhrUrl.length);
                     const idM4ObjectTrim = idM4Object.replace("/","");
-                    if( _metadataValues.has(idM4ObjectTrim)){
-                        _responseStatus = 200;
-                        _responseHeaders = { 'Content-Type': 'text/xml' }
-                        _responseData = _metadataValues.get(idM4ObjectTrim);
-                    }else{
-                        console.error("[M4Node.js] - M4Object '"+idM4ObjectTrim+"' metadata mock must be setted");
-                        _responseStatus = 404;
-                        _responseHeaders = { 'Content-Type': 'text/plain' };
-                        _responseData = "[M4Node.js] - M4Object '"+idM4ObjectTrim+"' metadata mock must be setted";
+
+                    if(_metadataValues.has(idM4ObjectTrim) === false){
+                        throw new Error("[M4Node.js] - M4Object '"+idM4ObjectTrim+"' metadata mock must be setted");
                     }
+                    
+                    _responseStatus = 200;
+                    _responseHeaders = { 'Content-Type': 'text/xml' }
+                    _responseData = _metadataValues.get(idM4ObjectTrim);
 
                 }else{
-                    console.error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
-                    _responseStatus = 404;
-                    _responseHeaders = { 'Content-Type': 'text/plain' };
-                    _responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
+                    throw new Error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
                 }
-            }else{
-                console.error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
+    
+            }catch(error){
+                console.error((error as Error).message);
                 _responseStatus = 404;
                 _responseHeaders = { 'Content-Type': 'text/plain' };
-                _responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
+                _responseData = (error as Error).message;
             }
 
             xhr.respond(_responseStatus, _responseHeaders, _responseData);
