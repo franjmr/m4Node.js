@@ -12,7 +12,6 @@ import { M4NodeCurrentChangedEvent } from "./m4Interfaces/client/events/M4NodeCu
 import { M4NodeRecordsChangedEvent } from "./m4Interfaces/client/events/M4NodeRecordsChangedEvent";
 import { M4ItemChangedEvent } from "./m4Interfaces/client/events/M4ItemChangedEvent";
 import { M4LogonResult } from "./m4Interfaces/M4LogonResult";
-import { MockXhr } from "mock-xmlhttprequest/types";
 import * as MockXMLHttpRequest from "mock-xmlhttprequest";
 
 const { JSDOM } = jsdom;
@@ -123,16 +122,43 @@ export class M4ApiNode {
 
     __mock__initialize__(): void{
         const _metadataValues = this.mapMockM4ObjectMetadata;
-        const MockXhr = MockXMLHttpRequest.newMockXhr();
+        const _mockXhr = MockXMLHttpRequest.newMockXhr();
+        const _urlLoadMetadata = this.server + "/servlet/M4JSServices/metadata/";
+        const _urlLoadMetadataV = _urlLoadMetadata +"v/";
+        const _urlLoadMetadataMd = _urlLoadMetadata +"md/";
+        _mockXhr.onSend = (xhr : any) => {
+            if(xhr.url && xhr.url.startsWith(_urlLoadMetadata)){
+                const _xhrUrl :string = xhr.url;
+                if(_xhrUrl.startsWith(_urlLoadMetadataV)){
+                    const responseHeaders = { 'Content-Type': 'text/plain' };
+                    const responseData = "";
+                    xhr.respond(200, responseHeaders, responseData);
+                }else if(_xhrUrl.startsWith(_urlLoadMetadataMd)){
+                    const idM4Object = _xhrUrl.substring(_xhrUrl.lastIndexOf("md/") + 3 ,_xhrUrl.length);
+                    const idM4ObjectTrim = idM4Object.replace("/","");
+                    const responseHeaders = { 'Content-Type': 'text/xml' };
+                    if( _metadataValues.has(idM4ObjectTrim)){
+                        const responseData = _metadataValues.get(idM4ObjectTrim);
+                        xhr.respond(200, responseHeaders, responseData);
+                    }else{
+                        xhr.respond(404, responseHeaders, "");
+                    }
 
-        MockXhr.onSend = (xhr : MockXhr) => {
-            //Aqui evaluar el contenido de la petición URL y recpger el valor del mapa en función del metadato.
-            const responseHeaders = { 'Content-Type': 'text/xml' };
-            const responseData = _metadataValues.get("idm4obecjt");
-            xhr.respond(200, responseHeaders, responseData);
+                }else{
+                    console.error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
+                    const responseHeaders = { 'Content-Type': 'text/plain' };
+                    const responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
+                    xhr.respond(404, responseHeaders, responseData);
+                }
+            }else{
+                console.error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
+                const responseHeaders = { 'Content-Type': 'text/plain' };
+                const responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
+                xhr.respond(404, responseHeaders, responseData);
+            }
         };
     
-        this.m4Window.XMLHttpRequest = MockXhr;
+        this.m4Window.XMLHttpRequest = _mockXhr;
     }
 
     __mock_reset__(){
@@ -140,12 +166,8 @@ export class M4ApiNode {
         this.mapMockM4Request.clear();
     }
 
-    __mock__loadMetada__(m4objectId: string, m4Metadata : string): void{
-        this.mapMockM4ObjectMetadata.set(m4objectId, m4Metadata);
-    }
-
-    __mock__request__(requestId: string, m4Request: M4Request): void{
-        this.mapMockM4Request.set(requestId, m4Request);
+    __mock__setM4ObjectMetadata__(m4objectId: string, m4ObjectMetadata: string): void{
+        this.mapMockM4ObjectMetadata.set(m4objectId, m4ObjectMetadata);
     }
 
     /**

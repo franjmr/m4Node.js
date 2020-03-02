@@ -27,6 +27,7 @@
     "build": "tsc",
     "deploy": "tsc && npm publish",
     "exampleDev": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.ts",
+    "exampleMockDev": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.mock.ts",
     "examplePro": "tsc && node ./dist/_examples/app.js"
   },
   "repository": {
