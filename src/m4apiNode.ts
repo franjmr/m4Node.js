@@ -106,7 +106,7 @@ export class M4ApiNode {
         this.showConsoleMsg = false;
     }
 
-    __importJsFileFromUrl__(url:string): Promise<boolean>{
+    __importJavaScriptFileFromUrl__(url:string): Promise<boolean>{
         this.consoleMessage("Loading Javascript file from url: "+url);
         return new Promise((resolve) => { 
             http.get( url, (res) => {
@@ -120,42 +120,51 @@ export class M4ApiNode {
         });
     }
 
-    __mock__initialize__(): void{
+    __mock__initialize__(): void {
         const _metadataValues = this.mapMockM4ObjectMetadata;
         const _mockXhr = MockXMLHttpRequest.newMockXhr();
         const _urlLoadMetadata = this.server + "/servlet/M4JSServices/metadata/";
-        const _urlLoadMetadataV = _urlLoadMetadata +"v/";
-        const _urlLoadMetadataMd = _urlLoadMetadata +"md/";
         _mockXhr.onSend = (xhr : any) => {
+            let _responseStatus = 0;
+            let _responseHeaders = null
+            let _responseData = null;
             if(xhr.url && xhr.url.startsWith(_urlLoadMetadata)){
                 const _xhrUrl :string = xhr.url;
+                const _urlLoadMetadataV = _urlLoadMetadata +"v/";
+                const _urlLoadMetadataMd = _urlLoadMetadata +"md/";
+
                 if(_xhrUrl.startsWith(_urlLoadMetadataV)){
-                    const responseHeaders = { 'Content-Type': 'text/plain' };
-                    const responseData = "";
-                    xhr.respond(200, responseHeaders, responseData);
+                    _responseStatus = 200;
+                    _responseHeaders = { 'Content-Type': 'text/plain' };
+                    _responseData = "";
                 }else if(_xhrUrl.startsWith(_urlLoadMetadataMd)){
                     const idM4Object = _xhrUrl.substring(_xhrUrl.lastIndexOf("md/") + 3 ,_xhrUrl.length);
                     const idM4ObjectTrim = idM4Object.replace("/","");
-                    const responseHeaders = { 'Content-Type': 'text/xml' };
                     if( _metadataValues.has(idM4ObjectTrim)){
-                        const responseData = _metadataValues.get(idM4ObjectTrim);
-                        xhr.respond(200, responseHeaders, responseData);
+                        _responseStatus = 200;
+                        _responseHeaders = { 'Content-Type': 'text/xml' }
+                        _responseData = _metadataValues.get(idM4ObjectTrim);
                     }else{
-                        xhr.respond(404, responseHeaders, "");
+                        console.error("[M4Node.js] - M4Object '"+idM4ObjectTrim+"' metadata mock must be setted");
+                        _responseStatus = 404;
+                        _responseHeaders = { 'Content-Type': 'text/plain' };
+                        _responseData = "[M4Node.js] - M4Object '"+idM4ObjectTrim+"' metadata mock must be setted";
                     }
 
                 }else{
                     console.error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
-                    const responseHeaders = { 'Content-Type': 'text/plain' };
-                    const responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
-                    xhr.respond(404, responseHeaders, responseData);
+                    _responseStatus = 404;
+                    _responseHeaders = { 'Content-Type': 'text/plain' };
+                    _responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
                 }
             }else{
                 console.error("[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url);
-                const responseHeaders = { 'Content-Type': 'text/plain' };
-                const responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
-                xhr.respond(404, responseHeaders, responseData);
+                _responseStatus = 404;
+                _responseHeaders = { 'Content-Type': 'text/plain' };
+                _responseData = "[M4Node.js] - Mock not supported yet! Mock me: "+xhr.url;
             }
+
+            xhr.respond(_responseStatus, _responseHeaders, _responseData);
         };
     
         this.m4Window.XMLHttpRequest = _mockXhr;
@@ -166,7 +175,7 @@ export class M4ApiNode {
         this.mapMockM4Request.clear();
     }
 
-    __mock__setM4ObjectMetadata__(m4objectId: string, m4ObjectMetadata: string): void{
+    __mock__setM4ObjectMetadata__(m4objectId: string, m4ObjectMetadata: string):void{
         this.mapMockM4ObjectMetadata.set(m4objectId, m4ObjectMetadata);
     }
 
