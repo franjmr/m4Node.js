@@ -1,6 +1,6 @@
 {
   "name": "@automation/m4nodejs",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "M4JSAPI inside Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
     "@types/jest": "^24.9.1",
     "@types/jsdom": "^12.2.4",
     "@types/node": "^13.1.8",
-    "@types/tough-cookie": "^2.3.6"
+    "@types/tough-cookie": "^2.3.6",
+    "mock-xmlhttprequest": "^5.1.0"
   },
   "devDependencies": {
     "jest": "^25.1.0",
@@ -26,6 +27,7 @@
     "build": "tsc",
     "deploy": "tsc && npm publish",
     "exampleDev": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.ts",
+    "exampleMockDev": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.mock.ts",
     "examplePro": "tsc && node ./dist/_examples/app.js"
   },
   "repository": {
@@ -38,6 +40,6 @@
   "author": "Automation",
   "license": "ISC",
   "publishConfig": {
-    "registry":"http://nexus.meta4.com/repository/m4npm/"
+    "registry": "http://nexus.meta4.com/repository/m4npm/"
   }
 }
