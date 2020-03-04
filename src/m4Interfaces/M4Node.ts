@@ -2,6 +2,7 @@ export interface M4Node {
   addRecord(): void;
   getId(): string;
   getNodeValues(): any[];
+  getParentNode(): M4Node;
   count(): number;
   getCurrent(): number;
   getValue(itemId: string): any;

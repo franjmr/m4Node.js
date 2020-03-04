@@ -43,8 +43,9 @@ export class M4ApiNode {
     private m4Store: tough.MemoryCookieStore;
     private m4CookieStore: tough.CookieJar;
     private showConsoleMsg: boolean;
+    private isMocking: boolean;
     private mapMockM4ObjectMetadata: Map<string,string>;
-    private mapMockM4Request: Map<string,M4Request>;
+    public m4WindowXHR: XMLHttpRequest;
 
     /**
      * Constructor
@@ -60,8 +61,8 @@ export class M4ApiNode {
       this.m4Store = new tough.MemoryCookieStore();
       this.m4CookieStore = new tough.CookieJar(this.m4Store);
       this.showConsoleMsg = false;
+      this.isMocking = false;
       this.mapMockM4ObjectMetadata = new Map();
-      this.mapMockM4Request = new Map();
     }
 
     /**
@@ -106,6 +107,10 @@ export class M4ApiNode {
         this.showConsoleMsg = false;
     }
 
+    /**
+     * Import JavaScript file: compile and run code 
+     * @param {string} url 
+     */
     __importJavaScriptFileFromUrl__(url:string): Promise<boolean>{
         this.consoleMessage("Loading Javascript file from url: "+url);
         return new Promise((resolve) => { 
@@ -120,10 +125,18 @@ export class M4ApiNode {
         });
     }
 
+    /**
+     * Initialize M4JSAPI Mock
+     * - Override M4Executor.LoadMetadata: Load XML Metadata from mock
+     */
     __mock__initialize__(): void {
+        if(this.isMocking){
+            return;
+        }
+
         const _metadataValues = this.mapMockM4ObjectMetadata;
         const _mockXhr = MockXMLHttpRequest.newMockXhr();
-
+    
         _mockXhr.onSend = (xhr : any) => {
             let _responseStatus = 0;
             let _responseHeaders = null
@@ -174,16 +187,45 @@ export class M4ApiNode {
             xhr.respond(_responseStatus, _responseHeaders, _responseData);
         };
     
+        this.m4WindowXHR = this.m4Window.XMLHttpRequest;
         this.m4Window.XMLHttpRequest = _mockXhr;
+        this.isMocking = true;
     }
 
-    __mock_reset__(){
+    /**
+     * Reset Mock
+     * - Clear M4Object XML Metadata mocked
+     */
+    __mock__reset__(): void{
         this.mapMockM4ObjectMetadata.clear();
-        this.mapMockM4Request.clear();
     }
 
+    /**
+     * Finalize M4JSAPI Mock
+     * - Restores M4Executor.LoadMetadata
+     */
+    __mock__finalize__(): void{
+        if(!this.isMocking){
+            return;
+        }
+        this.m4Window.XMLHttpRequest = this.m4WindowXHR;
+        this.isMocking = false;
+    }
+
+    /**
+     * Set M4Object Metadata Content to mocking M4Executor.LoadMetadata
+     * @param {string} m4objectId 
+     * @param {string} m4ObjectMetadata 
+     */
     __mock__setM4ObjectMetadata__(m4objectId: string, m4ObjectMetadata: string):void{
         this.mapMockM4ObjectMetadata.set(m4objectId, m4ObjectMetadata);
+    }
+
+    /**
+     * Get Window Object from this instance
+     */
+    __getWindowObject__(): any {
+        return this.m4Window;
     }
 
     /**

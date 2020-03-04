@@ -11,17 +11,14 @@ async function exampleMock(){
 
     // Mock M4JSAPI
     const _metadataM4ObjPersonalInfo = fs.readFileSync("./__mocks__/metadata/PLCO_LOAD_ALL_PERSONAL_INFO.xml", 'utf8');
+
     m4apiNode.__mock__initialize__();
     m4apiNode.__mock__setM4ObjectMetadata__("PLCO_LOAD_ALL_PERSONAL_INFO",_metadataM4ObjPersonalInfo);
 
-    // Create M4Object with mock metadata
     const m4ObjectMock = await m4apiNode.createM4Object("PLCO_LOAD_ALL_PERSONAL_INFO");
     console.log("Mocked M4Object: "+m4ObjectMock.getId());
 
-    //Requet
-    const request01 = await m4apiNode.executeM4ObjectMethod(m4ObjectMock, "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
-
-    console.log("All done!");
+    m4apiNode.__mock__finalize__();
 }
 
 exampleMock();
