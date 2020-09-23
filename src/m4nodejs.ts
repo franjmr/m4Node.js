@@ -1,18 +1,19 @@
 import jsdom = require("jsdom");
 import rxjs = require('rxjs');
-import { M4Executor } from './m4Interfaces/M4Executor';
-import { M4Request } from './m4Interfaces/M4Request';
 import tough = require('tough-cookie');
 import http = require('http');
 import vm  = require('vm');
 import concat = require('concat-stream');
-import { M4Node } from "./m4Interfaces/M4Node";
-import { M4Object } from "./m4Interfaces/M4Object";
+import { M4Executor } from './m4Interfaces/M4Executor';
 import { M4NodeCurrentChangedEvent } from "./m4Interfaces/client/events/M4NodeCurrentChangedEvent";
 import { M4NodeRecordsChangedEvent } from "./m4Interfaces/client/events/M4NodeRecordsChangedEvent";
 import { M4ItemChangedEvent } from "./m4Interfaces/client/events/M4ItemChangedEvent";
 import { M4LogonResult } from "./m4Interfaces/M4LogonResult";
 import * as MockXMLHttpRequest from "mock-xmlhttprequest";
+import { M4Node } from "./m4Interfaces/M4Node";
+import { M4Object } from "./m4Interfaces/M4Object"
+import { M4Request } from './m4Interfaces/M4Request';
+import { meta4 } from "./m4Interfaces/IMeta4";
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -28,12 +29,38 @@ declare global {
         }
     }
     interface Window {
-        meta4: any;
+        meta4: meta4;
         meta4OnLoad: any
     } 
 }
-export class M4ApiNode {
 
+interface Base {
+    getApiUrl(): string;
+    getServer(): string;
+    getUser(): string;
+}
+
+interface Debug {
+    enableConsoleMessages(): void;
+    disableConsoleMessages(): void;
+    getCookieStore(): tough.MemoryCookieStore;
+    importJavaScriptFileFromUrl(url:string): void;
+}
+
+interface RxJS {
+    createObservableByNodeItemChanged(m4Node : M4Node): rxjs.Observable<any>
+    createObservableByNodeRecordsChanged(m4Node : M4Node): rxjs.Observable<any>
+    createObservableByNodeCurrentChanged(m4Node : M4Node): rxjs.Observable<any>
+    executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>
+}
+
+interface Mock {
+    initialize(): () => void;
+    setM4ObjectMetadata(m4objectId: string, m4ObjectMetadata: string): () => void;
+    finalize(): () => void;
+}
+
+export class M4NodeJS {
     private server: string;
     private user: string;
     private pass: string;
@@ -45,7 +72,7 @@ export class M4ApiNode {
     private showConsoleMsg: boolean;
     private isMocking: boolean;
     private mapMockM4ObjectMetadata: Map<string,string>;
-    public m4WindowXHR: XMLHttpRequest;
+    private m4WindowXHR: XMLHttpRequest;
 
     /**
      * Constructor
@@ -53,7 +80,7 @@ export class M4ApiNode {
      * @param {string} user
      * @param {string} pass
      */
-    constructor(server: string, user:string, pass:string) {
+    constructor(server: string, user?:string, pass?:string) {
       this.server = server;
       this.user = user;
       this.pass = pass;
@@ -68,50 +95,61 @@ export class M4ApiNode {
     /**
      * Returns User property value setted in constructor.
      */
-    getUser(): string {
+    private __base__getUser(): string {
         return this.user;
     }
 
     /**
      * Returns Server property value setted in constructor.
      */
-    getServer(): string {
+    private __base__getServer(): string {
         return this.server;
     }
 
     /**
      * Returns Api URL. (M4JSAPI Node URL)
      */
-    getApiUrl(): string {
+    private __base__getApiUrl(): string {
         return this.apiUrl;
     }
 
     /**
      * Returns Cookie Storage. (https://www.npmjs.com/package/tough-cookie)
      */
-    getCookieStore(): tough.MemoryCookieStore{
+    private __debug__getCookieStore(): tough.MemoryCookieStore{
         return this.m4Store;
     }
 
     /**
      * Enable Console messages.
      */
-    enableConsoleMessages():void {
+    private __debug__enableConsoleMessages():void {
         this.showConsoleMsg = true;
     }
 
     /**
      * Disable Console messages.
      */
-    disableConsoleMessages():void{
+    private __debug__disableConsoleMessages():void{
         this.showConsoleMsg = false;
+    }
+
+    /**
+     * Print M4Request log messages by console
+     * @param m4Request 
+     */
+    private printM4RequestLogMessages(m4Request: M4Request, isError?:boolean): void{
+        for(let logIndex = 0; logIndex < m4Request.getLogSize(); logIndex++ ){
+            const logMsg = m4Request.getLogMessage(logIndex)
+            this.consoleMessage("M4Request Log Message (Index "+logIndex+"): '"+logMsg.getMessage()+"'", isError);
+        }
     }
 
     /**
      * Import JavaScript file: compile and run code 
      * @param {string} url 
      */
-    __importJavaScriptFileFromUrl__(url:string): Promise<boolean>{
+    private __importJavaScriptFileFromUrl__(url:string): Promise<boolean>{
         this.consoleMessage("Loading Javascript file from url: "+url);
         return new Promise((resolve) => { 
             http.get( url, (res) => {
@@ -129,7 +167,7 @@ export class M4ApiNode {
      * Initialize M4JSAPI Mock
      * - Override M4Executor.LoadMetadata: Load XML Metadata from mock
      */
-    __mock__initialize__(): void {
+    private __mock__initialize__(): void {
         if(this.isMocking){
             return;
         }
@@ -196,7 +234,7 @@ export class M4ApiNode {
      * Reset Mock
      * - Clear M4Object XML Metadata mocked
      */
-    __mock__reset__(): void{
+    private __mock__reset__(): void{
         this.mapMockM4ObjectMetadata.clear();
     }
 
@@ -204,7 +242,7 @@ export class M4ApiNode {
      * Finalize M4JSAPI Mock
      * - Restores M4Executor.LoadMetadata
      */
-    __mock__finalize__(): void{
+    private __mock__finalize__(): void{
         if(!this.isMocking){
             return;
         }
@@ -217,24 +255,19 @@ export class M4ApiNode {
      * @param {string} m4objectId 
      * @param {string} m4ObjectMetadata 
      */
-    __mock__setM4ObjectMetadata__(m4objectId: string, m4ObjectMetadata: string):void{
+    private __mock__setM4ObjectMetadata__(m4objectId: string, m4ObjectMetadata: string):void{
         this.mapMockM4ObjectMetadata.set(m4objectId, m4ObjectMetadata);
     }
 
     /**
-     * Get Window Object from this instance
-     */
-    __getWindowObject__(): any {
-        return this.m4Window;
-    }
-
-    /**
      * Print menssage in the console.
-     * @param {String} message 
+     * @param {String} message
+     * @param {boolean} isError 
      */
-    private consoleMessage(message:string):void{
+    private consoleMessage(message:string, isError?:boolean):void{
         if(this.showConsoleMsg){
-            console.log("[M4Node.js] - "+message);
+            const consoleMsg = "[M4Node.js] - ".concat(message);
+            isError? console.error(consoleMsg):console.log(consoleMsg);
         }
     }
 
@@ -290,7 +323,7 @@ export class M4ApiNode {
     /**
      * Return jsdom.DOMWindow from instance.
      */
-    private getWindow() : jsdom.DOMWindow{
+    getWindow() : jsdom.DOMWindow{
         return this.m4Window;
     }
 
@@ -304,9 +337,9 @@ export class M4ApiNode {
     }
 
     /**
-     * Initialize M4jsapi instance as jsdom.DOMWindow.
+     * Load M4jsapi instance as jsdom.DOMWindow.
      */
-    async initializeAsync(): Promise<boolean>{
+    async load(): Promise<boolean>{
         const { window } = new JSDOM(``, {
             url: this.apiUrl,
             referrer: this.server,
@@ -332,21 +365,26 @@ export class M4ApiNode {
     /**
      * Logon User promise-based asynchronous.
      */
-    logon(): Promise<M4LogonResult>{
+    logon(user?: string, pass?: string): Promise<M4LogonResult>{
         const _m4Executor = this.getM4Executor();
-        const _user = this.user;
-        const _pass = this.pass;
+        const _user = user? user: this.user;
+        const _pass = pass? pass: this.pass;
+        if(!_user || !_pass){
+            throw new Error('Logon parameters are not valid!');
+        }
         this.consoleMessage("User Logon '"+_user+"'");
         return new Promise((resolve, reject) => { 
             _m4Executor.logon(_user, _pass, "2", 
                 (request: M4Request) => {
                     if (!request.getResult()) {
+                        this.printM4RequestLogMessages(request,true);
                         reject(request);
                     }else {
                         resolve(request.getResult());
                     }
                 }, 
                 (request: M4Request) => {
+                    this.printM4RequestLogMessages(request,true);
                     reject(request);
                 }
             );
@@ -358,7 +396,7 @@ export class M4ApiNode {
      */
     logout(): Promise<M4Request>{
         const _m4Executor = this.getM4Executor();
-        this.consoleMessage("User logout '"+this.user+"'");
+        this.consoleMessage("User logout!");
         return new Promise((resolve) => { 
             _m4Executor.logout(
                 (request) => {
@@ -384,11 +422,12 @@ export class M4ApiNode {
                     resolve(request);
                 }, 
                 (request: M4Request) => {
+                    this.printM4RequestLogMessages(request,true);
                     reject(request);
                 }
             );
         }) 
-    };
+    }
 
     /**
      * Execute method promise-based asynchronous. [Implicitly load metadata]
@@ -402,7 +441,7 @@ export class M4ApiNode {
         const m4object = await this.createM4Object(m4objectId);
         const executeMethod = await this.executeM4ObjectMethod(m4object,nodeId, methodId, methodArgs);
         return executeMethod;
-    };
+    }
 
     /**
      * Execute method promise-based asynchronous.
@@ -421,12 +460,13 @@ export class M4ApiNode {
                 (request: M4Request) => {
                     resolve(request);
                 }, 
-                (request: M4Request) => {
+                (request: M4Request | any) => {
+                    this.printM4RequestLogMessages(request,true);
                     reject(request);
                 }
             );
         }) 
-    };
+    }
 
     /**
      * Execute MRequest instance.
@@ -441,11 +481,12 @@ export class M4ApiNode {
                     resolve(request);
                 }, 
                 (request: M4Request) => {
+                    this.printM4RequestLogMessages(request,true);
                     reject(request);
                 }
             );
         }) 
-    };
+    }
 
     /**
      * Execute method promise-based asynchronous.
@@ -458,20 +499,8 @@ export class M4ApiNode {
         const _localWindow = this.getWindow();
         const _request: M4Request = new _localWindow.meta4.M4Request(m4object, nodeId, methodId, methodArgs);
         return _request
-    };
-    
-    /**
-     * Convert execute method Promise to Observable RxJS. [Implicitly load metadata]
-     * @param {String} m4objectId M4Object ID
-     * @param {String} nodeId Node ID
-     * @param {String} methodId Method ID
-     * @param {Array} methodArgs Method arguments
-     */
-    executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>{
-        const _executeMethodObservable = rxjs.from(this.executeMethod(m4objectId, nodeId, methodId, methodArgs));
-        return _executeMethodObservable;
     }
-
+    
     /**
      * Create object instance asynchronous. [Implicitly load metadata]
      * @param {String} m4objectId M4Object ID
@@ -483,10 +512,22 @@ export class M4ApiNode {
     }
 
     /**
+     * Convert execute method Promise to Observable RxJS. [Implicitly load metadata]
+     * @param {String} m4objectId M4Object ID
+     * @param {String} nodeId Node ID
+     * @param {String} methodId Method ID
+     * @param {Array} methodArgs Method arguments
+     */
+    private __rxjs__executeMethodObservable(m4objectId: string, nodeId: string, methodId: string, methodArgs: any[]): rxjs.Observable<M4Request>{
+        const _executeMethodObservable = rxjs.from(this.executeMethod(m4objectId, nodeId, methodId, methodArgs));
+        return _executeMethodObservable;
+    }
+
+    /**
      * Register node item changed callback as RxJS Observable.
      * @param {M4Node} m4Node M4Node
      */
-    createObservableByNodeItemChanged(m4Node : M4Node): rxjs.Observable<any> {
+    private __rxjs__createObservableByNodeItemChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
         const observable = new rxjs.Observable(subscriber => {
             function subscriberFunction(eventValue:M4ItemChangedEvent){
@@ -502,7 +543,7 @@ export class M4ApiNode {
      * Register node records changed callback as RxJS Observable.
      * @param {M4Node} m4Node M4Node
      */
-    createObservableByNodeRecordsChanged(m4Node : M4Node): rxjs.Observable<any> {
+    private __rxjs__createObservableByNodeRecordsChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
         const observable = new rxjs.Observable(subscriber => {
             function subscriberFunction(eventValue:M4NodeRecordsChangedEvent){
@@ -518,7 +559,7 @@ export class M4ApiNode {
      * Register node current changed callback as RxJS Observable.
      * @param {M4Node} m4Node M4Node
      */
-    createObservableByNodeCurrentChanged(m4Node : M4Node): rxjs.Observable<any> {
+    private __rxjs__createObservableByNodeCurrentChanged(m4Node : M4Node): rxjs.Observable<any> {
         const _localWindow = this.getWindow();
         const observable = new rxjs.Observable(subscriber => {
             function subscriberFunction(eventValue:M4NodeCurrentChangedEvent){
@@ -529,4 +570,32 @@ export class M4ApiNode {
           });
         return observable;
     }
+
+    // API
+    base: Base = {
+        getApiUrl: this.__base__getApiUrl.bind(this),
+        getServer: this.__base__getServer.bind(this),
+        getUser: this.__base__getUser.bind(this)
+    }
+
+    debug: Debug = {
+        enableConsoleMessages: this.__debug__enableConsoleMessages.bind(this),
+        disableConsoleMessages: this.__debug__disableConsoleMessages.bind(this),
+        getCookieStore: this.__debug__getCookieStore.bind(this),
+        importJavaScriptFileFromUrl: this.__importJavaScriptFileFromUrl__.bind(this)
+    }
+
+    rxjs: RxJS = {
+        createObservableByNodeItemChanged: this.__rxjs__createObservableByNodeItemChanged.bind(this),
+        createObservableByNodeRecordsChanged: this.__rxjs__createObservableByNodeRecordsChanged.bind(this),
+        createObservableByNodeCurrentChanged: this.__rxjs__createObservableByNodeCurrentChanged.bind(this),
+        executeMethodObservable: this.__rxjs__executeMethodObservable.bind(this)
+    }
+
+    mock: Mock = {
+        initialize: this.__mock__initialize__.bind(this),
+        setM4ObjectMetadata: this.__mock__setM4ObjectMetadata__.bind(this),
+        finalize: this.__mock__finalize__.bind(this)
+    }
+
 }
