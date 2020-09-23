@@ -1,24 +1,20 @@
-import { M4ApiNode } from "../m4apiNode";
 import * as fs from "fs";
+import { M4NodeJS } from "../m4nodejs";
 
 async function exampleMock(){
+    const m4NodeJS = new M4NodeJS("http://jonsnow:13020");
+    await m4NodeJS.load();
     
-    // Create Instances
-    const m4apiNode = new M4ApiNode("http://arya.meta4.com:5020","notExists","foo");
+    const m4ObjectId = "PLCO_LOAD_ALL_PERSONAL_INFO";
+    const m4MetadataMock = fs.readFileSync("./__mocks__/metadata/"+m4ObjectId+".xml", 'utf8');
+    
+    m4NodeJS.mock.initialize();
+    m4NodeJS.mock.setM4ObjectMetadata(m4ObjectId, m4MetadataMock);
 
-    // Initialize instances
-    await m4apiNode.initializeAsync();
+    const m4ObjectMock = await m4NodeJS.createM4Object(m4ObjectId);
+    console.log("Mocked M4Object: ".concat(m4ObjectMock.getId()));
 
-    // Mock M4JSAPI
-    const _metadataM4ObjPersonalInfo = fs.readFileSync("./__mocks__/metadata/PLCO_LOAD_ALL_PERSONAL_INFO.xml", 'utf8');
-
-    m4apiNode.__mock__initialize__();
-    m4apiNode.__mock__setM4ObjectMetadata__("PLCO_LOAD_ALL_PERSONAL_INFO",_metadataM4ObjPersonalInfo);
-
-    const m4ObjectMock = await m4apiNode.createM4Object("PLCO_LOAD_ALL_PERSONAL_INFO");
-    console.log("Mocked M4Object: "+m4ObjectMock.getId());
-
-    m4apiNode.__mock__finalize__();
+    m4NodeJS.mock.finalize();
 }
 
 exampleMock();
