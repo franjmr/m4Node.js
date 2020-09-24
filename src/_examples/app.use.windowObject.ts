@@ -1,39 +1,39 @@
 import { M4NodeJS } from "../m4nodejs";
+import { M4NodeJsFactory } from "..";
+import { M4Object } from "../m4Interfaces/M4Object";
+import { M4Node } from "../m4Interfaces/M4Node";
+import { DOMWindow } from "jsdom";
 
-const server = "http://jonsnow:13020";
-const user = "JCM_ESS";
-const pass = "123";
+const server:string = "http://jonsnow:13020";
+const user:string = "JCM_ESS";
+const pass:string = "123";
 
-const M4_OBJECT_ID = "PLCO_LOAD_ALL_PERSONAL_INFO";
-const M4_NODE_ID = "PLCO_PERSONAL_EMPLOYEE_INFORMT";
-const M4_METHOD_ID = "PLCO_LOAD_ALL_PERSONAL_INFO";
+const M4_OBJECT_ID:string = "PLCO_LOAD_ALL_PERSONAL_INFO";
+const M4_NODE_ID:string = "PLCO_PERSONAL_EMPLOYEE_INFORMT";
+const M4_METHOD_ID:string = "PLCO_LOAD_ALL_PERSONAL_INFO";
 
-async function example(){
-    const m4NodeJS = new M4NodeJS(server);
-    await m4NodeJS.load();
-    const logon = await m4NodeJS.logon(user,pass);
-
-    if(!logon.getToken()){
-        return;
-    }
-
-    const _window = m4NodeJS.getWindow();
-
+/**
+ * Use Window object to create M4JSAPI instances and use this into M4Nodejs API.
+ */
+async function exampleUseWindowObject():Promise<void> {
+    const m4NodeJS: M4NodeJS = await M4NodeJsFactory.newInstance(server);
+    
+    await m4NodeJS.logon(user,pass);
     await m4NodeJS.loadMetadata([M4_OBJECT_ID]);
 
-    const t3js = new _window.meta4.M4Object(M4_OBJECT_ID);
-    const args = ["","",""];
-    const requestResult = await m4NodeJS.executeM4ObjectMethod(t3js, M4_NODE_ID, M4_METHOD_ID, args);
-
-    const requestObject = requestResult.getObject();
-    const requestNode = requestObject.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
-    const requestNodeValue = requestNode.getValue("PSCO_EMPLOYEE_NAME");
+    const _window: DOMWindow = m4NodeJS.getWindow();
+    const m4Object: M4Object = new _window.meta4.M4Object(M4_OBJECT_ID);
+    const args:string[] = ["","",""];
+    await m4NodeJS.executeM4ObjectMethod(m4Object, M4_NODE_ID, M4_METHOD_ID, args);
     
-    console.log("Hi "+requestNodeValue+ "!");
+    const m4Node:M4Node = m4Object.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
+    const employeeName:string = m4Node.getValue("PSCO_EMPLOYEE_NAME");
+    
+    console.log("Hi "+employeeName+ "!");
     
     await m4NodeJS.logout();
 
-    console.log("All done!")
+    console.log("All done!");
 }
 
-example();
+exampleUseWindowObject();

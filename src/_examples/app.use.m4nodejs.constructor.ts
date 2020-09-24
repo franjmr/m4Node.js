@@ -1,32 +1,18 @@
 import { M4NodeJS } from "../m4nodejs";
 
-const server = "http://jonsnow:13020";
-const user = "JCM_ESS";
-const pass = "123";
+const server:string = "http://jonsnow:13020";
 
-async function example(){
-    const m4NodeJS = new M4NodeJS(server);
+/**
+ * Use M4Node.js constructor to create a new instance (NOT Loads M4JSAPI automatically)
+ */
+async function exampleM4NodejsConstructor():Promise<void> {
+    const m4NodeJS:M4NodeJS = new M4NodeJS(server);
     await m4NodeJS.load();
-    const logon = await m4NodeJS.logon(user,pass);
 
-    if(!logon.getToken()){
-        return;
-    }
+    const apiUrl:string = m4NodeJS.base.getApiUrl();
+    console.log("Api URL: ".concat(apiUrl));
 
-    m4NodeJS.debug.enableConsoleMessages();
-
-    await m4NodeJS.loadMetadata(['PLCO_LOAD_ALL_PERSONAL_INFO']);
-    const requestResult = await m4NodeJS.executeMethod("PLCO_LOAD_ALL_PERSONAL_INFO", "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
-
-    const requestObject = requestResult.getObject();  
-    const requestNode = requestObject.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
-    const requestNodeValue = requestNode.getValue("PSCO_EMPLOYEE_NAME");
-    
-    console.log("Hi "+requestNodeValue+ "!");
-    
-    await m4NodeJS.logout();
-
-    console.log("All done!")
+    console.log("All done!");
 }
 
-example();
+exampleM4NodejsConstructor();
