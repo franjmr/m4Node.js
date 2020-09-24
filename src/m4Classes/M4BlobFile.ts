@@ -1,5 +1,7 @@
 import { com_meta4_js_client_M4BlobRequestConfig } from "./M4BlobRequestConfig";
 
+declare let window:any;
+
 // tslint:disable-next-line: class-name
 export class com_meta4_js_client_M4BlobFile {
     protected _ref: any;

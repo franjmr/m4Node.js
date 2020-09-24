@@ -1,4 +1,6 @@
-// tslint:disable-next-line: class-name
+declare let window:any;
+
+// tslint:disable-next-line:class-name
 export class com_meta4_js_client_M4BlobRequestConfig {
     protected _ref: any;
   

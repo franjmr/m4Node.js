@@ -11,6 +11,8 @@ import { com_meta4_js_shared_M4LoadStatus } from "../m4Classes/M4LoadStatus";
 import { com_meta4_js_client_M4NodeMetadata } from "../m4Classes/M4NodeMetadata";
 import { com_meta4_js_client_M4ObjectMetadata } from "../m4Classes/M4ObjectMetadata";
 import { com_meta4_js_shared_M4SecurityStatus } from "../m4Classes/M4SecurityStatus";
+import { com_meta4_js_client_M4BlobFile } from "../m4Classes/M4BlobFile";
+import { com_meta4_js_client_M4BlobRequestConfig } from "../m4Classes/M4BlobRequestConfig";
 
 // tslint:disable-next-line: class-name
 export interface meta4 {
@@ -21,8 +23,8 @@ export interface meta4 {
     M4Node: M4Node;
     M4Object: M4Object;
     M4Request: M4Request;
-    M4BlobFile: any;
-    M4BlobRequestConfig: any;
+    M4BlobFile: com_meta4_js_client_M4BlobFile;
+    M4BlobRequestConfig: com_meta4_js_client_M4BlobRequestConfig;
     M4DataProperties: com_meta4_js_shared_M4DataProperties;
     M4ItemMetadata: com_meta4_js_client_M4ItemMetadata;
     M4LoadStatus: com_meta4_js_shared_M4LoadStatus;
