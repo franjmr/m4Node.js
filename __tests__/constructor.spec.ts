@@ -1,22 +1,17 @@
 import { M4NodeJS } from "../dist/m4nodejs";
 
-describe("M4ApiNode constructor Suite", ()=>{
-
-    beforeAll(()=>{
-        jest.setTimeout(60000);
-    })
-    
-    test("should load M4JSAPI when use constructor without arguments", ()=> {
-        const server = "http://jonsnow:13020";
-        const m4Node = new M4NodeJS(server);
+describe("M4Nodejs constructor Suite", ()=>{
+    it("should create an instance when use the M4Nodejs constructor with the server url", ()=> {
+        const server:string = "http://server.meta4.com";
+        const m4Node:M4NodeJS = new M4NodeJS(server);
         expect(m4Node).toBeTruthy();
     });
 
-    test("should load M4JSAPI when use constructor with arguments", (done)=> {
-        const server = "http://jonsnow:13020";
-        const user = "JCM_ESS";
-        const pass = "123";
-        const m4Node = new M4NodeJS(server,user,pass);
+    it("should create an instance when use the M4Nodejs constructor with the server url, user and pass", ()=> {
+        const server:string = "http://server.meta4.com";
+        const user:string = "User";
+        const pass:string = "Pass";
+        const m4Node:M4NodeJS = new M4NodeJS(server,user,pass);
         expect(m4Node).toBeTruthy();
     });
 });
