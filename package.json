@@ -5,36 +5,37 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@types/jsdom": "^12.2.4",
+    "@types/tough-cookie": "^2.3.6",
     "concat-stream": "^2.0.0",
+    "mock-xmlhttprequest": "^5.1.0",
     "rxjs": "^6.5.4",
     "tough-cookie": "^3.0.1",
     "ts-node-dev": "^1.0.0-pre.44",
-    "window": "^4.2.6",
-    "@types/jest": "^24.9.1",
-    "@types/jsdom": "^12.2.4",
-    "@types/node": "^13.1.8",
-    "@types/tough-cookie": "^2.3.6",
-    "mock-xmlhttprequest": "^5.1.0"
+    "window": "^4.2.6"
   },
   "devDependencies": {
-    "jest": "^25.1.0",
-    "ts-jest": "^25.0.0",
+    "@types/jasmine": "^3.5.14",
+    "@types/node": "^13.13.21",
+    "jasmine": "^3.6.1",
+    "ts-node": "^9.0.0",
     "tslint": "^6.0.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.9.7"
   },
   "scripts": {
-    "test": "jest",
+    "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
     "build": "tsc",
     "deploy": "tsc && npm publish",
-    "exampleDebugCookie": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.debug.cookies.ts",
-    "exampleDisplayLogMsg": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.display.logMessages.ts",
-    "exampleMock": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.mock.ts",
-    "exampleRxjsObservable": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.rxjs.observables.ts",
-    "exampleWithConstructor": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.use.m4nodejs.constructor.ts",
-    "exampleWithFactory": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.use.m4nodejs.factory.ts",
-    "exampleWithWindowObject": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.use.windowObject.ts",
-    "exampleDebugCookieDist": "tsc && node ./dist/_examples/app.debug.cookies.js",
-    "createXmlMetatadata": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.testutils.ts"
+    "example:debugCookie": "ts-node-dev --transpileOnly ./src/_examples/app.debug.cookies.ts",
+    "example:displayLogMsg": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.display.logMessages.ts",
+    "example:executeMethod": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.execute.method.ts",
+    "example:mockM4object.ts": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.mock.m4object.ts",
+    "example:rxjsObservable": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.rxjs.observables.ts",
+    "example:useConstructor": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.use.m4nodejs.constructor.ts",
+    "example:useFactory": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.use.m4nodejs.factory.ts",
+    "example:useWindowObject": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.use.windowObject.ts",
+    "example:useWindowObjectOnly": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.use.windowObjectOnly.ts.ts",
+    "testUtils:createXmlMetatadata": "ts-node-dev --respawn --transpileOnly ./src/_examples/app.mock.xmlMetadataToFile.ts"
   },
   "repository": {
     "type": "git",
