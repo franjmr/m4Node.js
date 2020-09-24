@@ -4,6 +4,7 @@ import { M4Executor } from "../m4Interfaces/M4Executor";
 import { DOMWindow } from "jsdom";
 import { M4Object } from "../m4Interfaces/M4Object";
 import { M4Node } from "../m4Interfaces/M4Node";
+import { M4NodeJsFactory } from "..";
 
 const server:string = "http://jonsnow:13020";
 const user:string = "JCM_ESS";
@@ -26,8 +27,7 @@ function _logout(m4Executor: M4Executor): void{
  * Use Window object to create M4JSAPI instances and execute M4JSAPI prototype
  */
 async function exampleUseWindowObjectOnly():Promise<void> {
-    const m4NodeJS:M4NodeJS = new M4NodeJS(server);
-    await m4NodeJS.load();
+    const m4NodeJS: M4NodeJS = await M4NodeJsFactory.newInstance(server);
     
     const _window: DOMWindow = m4NodeJS.getWindow();
 
