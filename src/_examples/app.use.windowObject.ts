@@ -18,11 +18,11 @@ async function example(){
         return;
     }
 
-    const window = m4NodeJS.getWindow();
+    const _window = m4NodeJS.getWindow();
 
     await m4NodeJS.loadMetadata([M4_OBJECT_ID]);
 
-    const t3js = new window.meta4.M4Object(M4_OBJECT_ID);
+    const t3js = new _window.meta4.M4Object(M4_OBJECT_ID);
     const args = ["","",""];
     
     const requestResult = await m4NodeJS.executeM4ObjectMethod(t3js, M4_NODE_ID, M4_METHOD_ID, args);
