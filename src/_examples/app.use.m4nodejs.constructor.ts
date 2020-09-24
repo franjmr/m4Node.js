@@ -18,12 +18,11 @@ async function example(){
     await m4NodeJS.loadMetadata(['PLCO_LOAD_ALL_PERSONAL_INFO']);
     const requestResult = await m4NodeJS.executeMethod("PLCO_LOAD_ALL_PERSONAL_INFO", "PLCO_PERSONAL_EMPLOYEE_INFORMT", "PLCO_LOAD_ALL_PERSONAL_INFO", ["","",""]);
 
-    const requestObject = requestResult.getObject();
-    if( requestObject ){
-        const requestNode = requestObject.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
-        const requestNodeValue = requestNode.getValue("PSCO_EMPLOYEE_NAME");
-        console.log("Hi "+requestNodeValue+ "!");
-    }
+    const requestObject = requestResult.getObject();  
+    const requestNode = requestObject.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
+    const requestNodeValue = requestNode.getValue("PSCO_EMPLOYEE_NAME");
+    
+    console.log("Hi "+requestNodeValue+ "!");
     
     await m4NodeJS.logout();
 
