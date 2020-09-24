@@ -13,7 +13,7 @@ import * as MockXMLHttpRequest from "mock-xmlhttprequest";
 import { M4Node } from "./m4Interfaces/M4Node";
 import { M4Object } from "./m4Interfaces/M4Object"
 import { M4Request } from './m4Interfaces/M4Request';
-import { meta4 } from "./m4Interfaces/IMeta4";
+import { IMeta4 } from "./m4Interfaces/IMeta4";
 
 const { JSDOM } = jsdom;
 const baseFile = "/m4jsapi_node/m4jsapi_node.nocache.js";
@@ -29,7 +29,7 @@ declare global {
         }
     }
     interface Window {
-        meta4: meta4;
+        meta4: IMeta4;
         meta4OnLoad: any
     } 
 }

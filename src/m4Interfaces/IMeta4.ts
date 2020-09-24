@@ -15,7 +15,7 @@ import { com_meta4_js_client_M4BlobFile } from "../m4Classes/M4BlobFile";
 import { com_meta4_js_client_M4BlobRequestConfig } from "../m4Classes/M4BlobRequestConfig";
 
 // tslint:disable-next-line: class-name
-export interface meta4 {
+export interface IMeta4 {
     M4Executor: M4Executor;
     M4LogMessage: M4LogMessage;
     M4LogonParams:M4LogonParams;
