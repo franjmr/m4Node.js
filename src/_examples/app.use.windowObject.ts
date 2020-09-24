@@ -26,7 +26,7 @@ async function exampleUseWindowObject():Promise<void> {
     const args:string[] = ["","",""];
     await m4NodeJS.executeM4ObjectMethod(m4Object, M4_NODE_ID, M4_METHOD_ID, args);
     
-    const m4Node:M4Node = m4Object.getNode("PSCO_EMPLOYEE_RECORD_HEADER");
+    const m4Node:M4Node = m4Object.getNode(M4_NODE_ID);
     const employeeName:string = m4Node.getValue("PSCO_EMPLOYEE_NAME");
     
     console.log("Hi "+employeeName+ "!");
