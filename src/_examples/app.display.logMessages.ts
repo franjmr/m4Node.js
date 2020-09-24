@@ -1,5 +1,4 @@
 import { M4NodeJS } from "../m4nodejs";
-import { M4Request } from "../m4Interfaces/M4Request";
 
 const server = "http://jonsnow:13020";
 const user = "JCM_ESS";

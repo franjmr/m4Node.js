@@ -1,5 +1,4 @@
 import { M4NodeJS } from "../m4nodejs";
-import { M4Object } from "../m4Interfaces/M4Object";
 
 const server = "http://jonsnow:13020";
 const user = "JCM_ESS";
@@ -24,7 +23,6 @@ async function example(){
 
     const t3js = new _window.meta4.M4Object(M4_OBJECT_ID);
     const args = ["","",""];
-    
     const requestResult = await m4NodeJS.executeM4ObjectMethod(t3js, M4_NODE_ID, M4_METHOD_ID, args);
 
     const requestObject = requestResult.getObject();
