@@ -9,10 +9,16 @@
         "outDir": "dist",
         "types": [
             "node",
-            "jest"
+            "jasmine"
         ]
     },
     "compileOnSave": true,
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts"]
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "__tests__",
+        //"src/_examples"
+    ]
 }

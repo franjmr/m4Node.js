@@ -1,4 +1,4 @@
-import { M4ApiNode } from "./m4apiNode";
+import { M4NodeJS } from "./m4nodejs";
 import fs from 'fs';
 import path from 'path';
 import { Subject} from "rxjs";
@@ -24,16 +24,16 @@ export class TestUtils {
             }
         });
 
-        const m4ApiNode = new M4ApiNode(server,user,pass);
-        await m4ApiNode.initializeAsync();
-        const logonResult = await m4ApiNode.logon();
+        const m4NodeJS = new M4NodeJS(server,user,pass);
+        await m4NodeJS.load();
+        const logonResult = await m4NodeJS.logon();
 
         if(!logonResult || !logonResult.getToken()) {
             throw new Error("You must be authenticated to create XML Metadata!");
         }
 
         const subject = new Subject();
-        const m4window = m4ApiNode.__getWindowObject__();
+        const m4window : any = m4NodeJS.getWindow();
         const oldXHROpen = m4window.XMLHttpRequest.prototype.open;
 
         m4window.XMLHttpRequest.prototype.open = function() {
@@ -55,11 +55,11 @@ export class TestUtils {
             return oldXHROpen.apply(this, arguments);
         }
         
-        await m4ApiNode.loadMetadata([m4objectId]);
+        await m4NodeJS.loadMetadata([m4objectId]);
 
         subject.subscribe(async (value: { id:string, xmlFilePath:string} )=>{
             console.log("M4Object: "+value.id+" > XML Metadata file created in '"+value.xmlFilePath+"'");
-            await m4ApiNode.logout();
+            await m4NodeJS.logout();
         })
     }
 }

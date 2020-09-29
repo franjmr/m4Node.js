@@ -1,13 +1,24 @@
 "use strict";
+import { M4NodeJS } from "./m4nodejs";
+import { TestUtils } from "./testUtils";
 
-import { M4ApiNode }  from './m4apiNode';
-import { TestUtils } from './testUtils';
-
-async function _initialize(server: string, user:string, pass:string) {
-    const _m4apiNode = new M4ApiNode(server,user,pass);
-    await _m4apiNode.initializeAsync();
-    return _m4apiNode;
+/**
+ * Create and load M4JSAPI Node
+ * @param server 
+ * @param user 
+ * @param pass 
+ */
+async function _newInstance(server: string, user?:string, pass?:string) {
+    const m4nodejs = new M4NodeJS(server,user,pass);
+    await m4nodejs.load();
+    return m4nodejs;
 }
 
-export const M4ApiNodejs = _initialize;
-export const M4TestUtils = TestUtils;
+export const M4NodeJsFactory = {
+    newInstance: _newInstance
+};
+
+export {
+    M4NodeJS,
+    TestUtils
+};
